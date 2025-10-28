@@ -31,14 +31,15 @@ const BottomActions = memo(() => {
           />
         </Link>
       )}
-      <Link aria-label={t('labs')} href={'/labs'}>
+      {/* Hide Labs for DxAi */}
+      {/* <Link aria-label={t('labs')} href={'/labs'}>
         <ActionIcon
           icon={FlaskConical}
           size={ICON_SIZE}
           title={t('labs')}
           tooltipProps={{ placement: 'right' }}
         />
-      </Link>
+      </Link> */}
     </Flexbox>
   );
 });

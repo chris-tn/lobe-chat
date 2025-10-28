@@ -190,10 +190,13 @@ const isPublicRoute = createRouteMatcher([
 ]);
 
 const isProtectedRoute = createRouteMatcher([
+  '/chat(.*)',
   '/settings(.*)',
   '/files(.*)',
   '/onboard(.*)',
   '/oauth(.*)',
+  '/discover(.*)',
+  '/labs(.*)',
   // ↓ cloud ↓
 ]);
 

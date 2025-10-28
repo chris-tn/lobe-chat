@@ -7,7 +7,7 @@ import { Flexbox } from 'react-layout-kit';
 
 import Statistic from '../../../../../../components/Statistic';
 
-const DEFAULT_DOC_URL = 'https://lobehub.com/docs/usage/agents/model';
+const DEFAULT_DOC_URL = 'https://dxai.vn/docs/usage/agents/model';
 
 export interface ParameterItemProps {
   defaultValue: string | number;

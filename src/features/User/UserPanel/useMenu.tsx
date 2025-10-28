@@ -41,31 +41,8 @@ import { authSelectors } from '@/store/user/selectors';
 
 import { useNewVersion } from './useNewVersion';
 
-const NewVersionBadge = memo(
-  ({
-    children,
-    showBadge,
-    onClick,
-  }: PropsWithChildren & { onClick?: () => void; showBadge?: boolean }) => {
-    const { t } = useTranslation('common');
-    if (!showBadge)
-      return (
-        <Flexbox flex={1} onClick={onClick}>
-          {children}
-        </Flexbox>
-      );
-    return (
-      <Flexbox align={'center'} flex={1} gap={8} horizontal onClick={onClick} width={'100%'}>
-        <span>{children}</span>
-        <Badge count={t('upgradeVersion.hasNew')} />
-      </Flexbox>
-    );
-  },
-);
-
 export const useMenu = () => {
   const { canInstall, install } = usePWAInstall();
-  const hasNewVersion = useNewVersion();
   const { t } = useTranslation(['common', 'setting', 'auth']);
   const { showCloudPromotion, hideDocs } = useServerConfigStore(featureFlagsSelectors);
   const [isLogin, isLoginWithAuth] = useUserStore((s) => [
@@ -81,25 +58,8 @@ export const useMenu = () => {
     },
   ];
 
-  const settings: MenuProps['items'] = [
-    {
-      extra: isDesktop ? (
-        <div>
-          <Hotkey keys={DEFAULT_DESKTOP_HOTKEY_CONFIG.openSettings} />
-        </div>
-      ) : undefined,
-      icon: <Icon icon={Settings2} />,
-      key: 'setting',
-      label: (
-        <Link href={'/settings'}>
-          <NewVersionBadge showBadge={hasNewVersion}>{t('userPanel.setting')}</NewVersionBadge>
-        </Link>
-      ),
-    },
-    {
-      type: 'divider',
-    },
-  ];
+  // Hide settings menu for DxAi - users cannot configure settings
+  const settings: MenuProps['items'] = [];
 
   /* ↓ cloud slot ↓ */
 
@@ -120,15 +80,15 @@ export const useMenu = () => {
   const data = !isLogin
     ? []
     : ([
-        {
-          icon: <Icon icon={HardDriveDownload} />,
-          key: 'import',
-          label: <DataImporter>{t('importData')}</DataImporter>,
-        },
-        {
-          type: 'divider',
-        },
-      ].filter(Boolean) as ItemType[]);
+      {
+        icon: <Icon icon={HardDriveDownload} />,
+        key: 'import',
+        label: <DataImporter>{t('importData')}</DataImporter>,
+      },
+      {
+        type: 'divider',
+      },
+    ].filter(Boolean) as ItemType[]);
 
   const helps: MenuProps['items'] = [
     showCloudPromotion && {
@@ -209,12 +169,12 @@ export const useMenu = () => {
 
   const logoutItems: MenuProps['items'] = isLoginWithAuth
     ? [
-        {
-          icon: <Icon icon={LogOut} />,
-          key: 'logout',
-          label: <span>{t('signout', { ns: 'auth' })}</span>,
-        },
-      ]
+      {
+        icon: <Icon icon={LogOut} />,
+        key: 'logout',
+        label: <span>{t('signout', { ns: 'auth' })}</span>,
+      },
+    ]
     : [];
 
   return { logoutItems, mainItems };

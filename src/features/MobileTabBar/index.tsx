@@ -27,10 +27,6 @@ export default memo<Props>(({ className, tabBarKey }) => {
   const { t } = useTranslation('common');
   const { styles } = useStyles();
   const router = useRouter();
-  const openSettings = () => {
-    router.push('/settings?active=llm');
-  };
-  const { showMarket } = useServerConfigStore(featureFlagsSelectors);
 
   const items: TabBarProps['items'] = useMemo(
     () =>
@@ -45,26 +41,10 @@ export default memo<Props>(({ className, tabBarKey }) => {
           },
           title: t('tab.chat'),
         },
-        showMarket && {
-          icon: (active: boolean) => (
-            <Icon className={active ? styles.active : undefined} icon={Bot} />
-          ),
-          key: SidebarTabKey.Discover,
-          onClick: () => {
-            router.push('/discover');
-          },
-          title: t('tab.discover'),
-        },
-        {
-          icon: (active: boolean) => (
-            <Icon className={active ? styles.active : undefined} icon={User} />
-          ),
-          key: SidebarTabKey.Setting,
-          onClick: openSettings,
-          title: t('tab.setting'),
-        },
+        // Hide discover/market tab for DxAi
+        // Hide settings tab for DxAi - users cannot configure settings
       ].filter(Boolean) as TabBarProps['items'],
-    [t],
+    [t, router, styles],
   );
 
   return <TabBar activeKey={tabBarKey} className={className} items={items} safeArea />;
