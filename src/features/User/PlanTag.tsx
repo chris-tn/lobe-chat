@@ -28,7 +28,7 @@ const PlanTag = memo<PlanTagProps>(({ type = PlanType.Preview }) => {
         bordered={false}
         style={{ background: theme.colorFill, borderRadius: 12, cursor: 'pointer' }}
       >
-        {t('userPanel.community')}
+        {'VIP'}
       </Tag>
     );
   }

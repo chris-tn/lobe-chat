@@ -12,7 +12,7 @@ import { RouteVariants } from '@/utils/server/routeVariants';
 
 import PageTitle from '../features/PageTitle';
 import Changelog from './features/ChangelogModal';
-import TelemetryNotification from './features/TelemetryNotification';
+// import TelemetryNotification from './features/TelemetryNotification';
 
 export const generateMetadata = async (props: DynamicLayoutProps) => {
   const locale = await RouteVariants.getLocale(props);
@@ -38,7 +38,7 @@ const Page = async (props: DynamicLayoutProps) => {
     <>
       <StructuredData ld={ld} />
       <PageTitle />
-      <TelemetryNotification mobile={isMobile} />
+      {/* <TelemetryNotification mobile={isMobile} /> */}
       {!isDesktop && showChangelog && !hideDocs && !isMobile && (
         <Suspense>
           <Changelog />

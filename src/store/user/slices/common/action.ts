@@ -54,12 +54,8 @@ export const createCommonSlice: StateCreator<
     useSWR<boolean>(
       shouldFetch ? 'checkTrace' : null,
       () => {
-        const userAllowTrace = preferenceSelectors.userAllowTrace(get());
-
-        // if user have set the trace, return false
-        if (typeof userAllowTrace === 'boolean') return Promise.resolve(false);
-
-        return Promise.resolve(get().isUserCanEnableTrace);
+        // Always return false to disable telemetry notification
+        return Promise.resolve(false);
       },
       {
         revalidateOnFocus: false,
@@ -93,14 +89,14 @@ export const createCommonSlice: StateCreator<
             const user =
               data.avatar || data.userId
                 ? merge(get().user, {
-                    avatar: data.avatar,
-                    email: data.email,
-                    firstName: data.firstName,
-                    fullName: data.fullName,
-                    id: data.userId,
-                    latestName: data.lastName,
-                    username: data.username,
-                  } as LobeUser)
+                  avatar: data.avatar,
+                  email: data.email,
+                  firstName: data.firstName,
+                  fullName: data.fullName,
+                  id: data.userId,
+                  latestName: data.lastName,
+                  username: data.username,
+                } as LobeUser)
                 : get().user;
 
             set(
