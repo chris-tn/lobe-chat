@@ -19,7 +19,7 @@ export interface PlanTagProps {
 }
 
 const PlanTag = memo<PlanTagProps>(({ type = PlanType.Preview }) => {
-  const { t } = useTranslation('common');
+  // const { t } = useTranslation('common');
   const theme = useTheme();
 
   if (type === PlanType.Preview) {
