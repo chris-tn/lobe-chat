@@ -133,7 +133,7 @@ export default memo(() => {
                   loading={loadingProvider === provider}
                   onClick={() => handleSignIn(provider)}
                 >
-                  {provider}
+                  Login SSO
                 </Button>
               ))
             ) : (
