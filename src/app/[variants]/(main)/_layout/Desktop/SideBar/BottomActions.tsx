@@ -15,8 +15,6 @@ const ICON_SIZE: ActionIconProps['size'] = {
 };
 
 const BottomActions = memo(() => {
-  const { t } = useTranslation('common');
-
   const { hideGitHub } = useServerConfigStore(featureFlagsSelectors);
 
   return (
