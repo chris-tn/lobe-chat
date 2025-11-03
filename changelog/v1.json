@@ -1,6 +1,30 @@
 [
   {
     "children": {
+      "fixes": ["OIDC error when connecting to self-host instance."]
+    },
+    "date": "2025-11-02",
+    "version": "1.142.9"
+  },
+  {
+    "children": {},
+    "date": "2025-10-30",
+    "version": "1.142.8"
+  },
+  {
+    "children": {
+      "improvements": ["Update i18n."]
+    },
+    "date": "2025-10-28",
+    "version": "1.142.7"
+  },
+  {
+    "children": {},
+    "date": "2025-10-28",
+    "version": "1.142.6"
+  },
+  {
+    "children": {
       "improvements": ["Add MiniMax-M2 model."]
     },
     "date": "2025-10-27",
