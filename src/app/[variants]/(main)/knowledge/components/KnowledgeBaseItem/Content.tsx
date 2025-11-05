@@ -67,21 +67,23 @@ const Content = memo<KnowledgeBaseItemProps>(({ id, name, showMore }) => {
         icon: <Icon icon={PencilLine} />,
         key: 'rename',
         label: t('rename', { ns: 'common' }),
-        onClick: () => {
+        onClick: ({ domEvent }: any) => {
+          domEvent.stopPropagation();
           toggleEditing(true);
         },
       },
       {
-        type: 'divider',
+        type: 'divider' as const,
       },
       {
         danger: true,
         icon: <Icon icon={Trash} />,
         key: 'delete',
         label: t('delete', { ns: 'common' }),
-        onClick: () => {
+        onClick: ({ domEvent }: any) => {
           if (!id) return;
 
+          domEvent.stopPropagation();
           modal.confirm({
             centered: true,
             okButtonProps: { danger: true },

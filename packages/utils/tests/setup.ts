@@ -6,5 +6,6 @@ if (
   typeof (globalThis as any).EdgeRuntime !== 'string'
 ) {
   // test with canvas
+  // @ts-ignore - Optional dependency not installed in Docker build
   import('vitest-canvas-mock');
 }

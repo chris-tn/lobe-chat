@@ -8,6 +8,7 @@ import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import DragUpload from '@/components/DragUpload';
+import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { useFileStore } from '@/store/file';
 
 const hotArea = css`
@@ -20,7 +21,12 @@ const hotArea = css`
 `;
 
 const UploadFileButton = ({ knowledgeBaseId }: { knowledgeBaseId?: string }) => {
-  const { t } = useTranslation('file');
+  const { t } = useTranslation(['file', 'chat']);
+  const isAdmin = useIsAdmin();
+
+  // Only admins (KB owners) can upload files
+  // Non-admins with shared KB access can only view
+  const isOwner = isAdmin;
 
   const pushDockFileList = useFileStore((s) => s.pushDockFileList);
   const items = useMemo<MenuProps['items']>(
@@ -66,12 +72,20 @@ const UploadFileButton = ({ knowledgeBaseId }: { knowledgeBaseId?: string }) => 
   return (
     <>
       <Dropdown menu={{ items }} placement="bottomRight">
-        <Button icon={UploadIcon}>{t('header.uploadButton')}</Button>
+        <Button
+          disabled={!isOwner}
+          icon={UploadIcon}
+          title={!isOwner ? t('onlyAdminCanCreate', { ns: 'chat' }) : undefined}
+        >
+          {t('header.uploadButton')}
+        </Button>
       </Dropdown>
-      <DragUpload
-        enabledFiles
-        onUploadFiles={(files) => pushDockFileList(files, knowledgeBaseId)}
-      />
+      {isOwner && (
+        <DragUpload
+          enabledFiles
+          onUploadFiles={(files) => pushDockFileList(files, knowledgeBaseId)}
+        />
+      )}
     </>
   );
 };

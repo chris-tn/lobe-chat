@@ -265,6 +265,8 @@ export default {
 
   noSelectedAgents: '还未选择成员',
 
+  onlyAdminCanCreate: '只有管理员可以创建助手',
+
   owner: '群主',
 
   pin: '置顶',
@@ -330,6 +332,28 @@ export default {
     sortSuccess: '重新排序成功',
     sorting: '分组排序更新中...',
     tooLong: '分组名称长度需在 1-20 之内',
+  },
+  share: {
+    add: '添加分享',
+    addNewShares: '添加新分享',
+    allUsersShared: '所有用户都已分享',
+    confirm: '分享',
+    currentShares: '当前分享列表',
+    failed: '分享失败',
+    globalShare: '全局分享',
+    globalShareDesc: '开启后，所有用户都可以看到和使用这个助手',
+    globalSuccess: '全局分享成功',
+    globalTag: '全局',
+    selectUsers: '选择用户',
+    selectUsersPlaceholder: '请选择要分享给的用户',
+    sharedBy: '由 {{name}} 分享',
+    sharedGlobal: '全局共享',
+    sharedWithEveryone: '已分享给所有人',
+    success: '成功分享给 {{count}} 个用户',
+    title: '分享「{{title}}」',
+    unshare: '取消分享',
+    unshareGlobalSuccess: '已取消全局分享',
+    unshareSuccess: '取消分享成功',
   },
   shareModal: {
     copy: '复制',

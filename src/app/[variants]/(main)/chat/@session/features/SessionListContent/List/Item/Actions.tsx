@@ -13,15 +13,18 @@ import {
   MoreVertical,
   Pin,
   PinOff,
+  Share2,
   Trash,
 } from 'lucide-react';
-import { memo, useMemo } from 'react';
+import { memo, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { isDesktop, isServerMode } from '@/const/version';
+import ShareAgentModal from '@/features/ShareAgentModal';
+import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { configService } from '@/services/config';
-import { useGlobalStore } from '@/store/global';
 import { useChatGroupStore } from '@/store/chatGroup';
+import { useGlobalStore } from '@/store/global';
 import { useSessionStore } from '@/store/session';
 import { sessionHelpers } from '@/store/session/helpers';
 import { sessionGroupSelectors, sessionSelectors } from '@/store/session/selectors';
@@ -44,6 +47,8 @@ interface ActionProps {
 const Actions = memo<ActionProps>(({ group, id, openCreateGroupModal, parentType, setOpen }) => {
   const { styles } = useStyles();
   const { t } = useTranslation('chat');
+  const isAdmin = useIsAdmin();
+  const [shareModalOpen, setShareModalOpen] = useState(false);
 
   const openSessionInNewWindow = useGlobalStore((s) => s.openSessionInNewWindow);
 
@@ -94,6 +99,19 @@ const Actions = memo<ActionProps>(({ group, id, openCreateGroupModal, parentType
               duplicateSession(id);
             },
           },
+          ...(isAdmin && parentType === 'agent'
+            ? [
+                {
+                  icon: <Icon icon={Share2} />,
+                  key: 'share',
+                  label: t('share', { ns: 'common' }),
+                  onClick: ({ domEvent }: { domEvent: Event }) => {
+                    domEvent.stopPropagation();
+                    setShareModalOpen(true);
+                  },
+                },
+              ]
+            : []),
           ...(isDesktop
             ? [
                 {
@@ -203,26 +221,47 @@ const Actions = memo<ActionProps>(({ group, id, openCreateGroupModal, parentType
     [id, pin, openSessionInNewWindow],
   );
 
+  const [meta] = useSessionStore((s) => {
+    const session = sessionSelectors.getSessionById(id)(s);
+    return [session.meta];
+  });
+
   return (
-    <Dropdown
-      arrow={false}
-      menu={{
-        items,
-        onClick: ({ domEvent }) => {
-          domEvent.stopPropagation();
-        },
-      }}
-      onOpenChange={setOpen}
-      trigger={['click']}
-    >
-      <ActionIcon
-        icon={MoreVertical}
-        size={{
-          blockSize: 28,
-          size: 16,
+    <>
+      <Dropdown
+        arrow={false}
+        menu={{
+          items,
+          onClick: ({ domEvent }) => {
+            domEvent.stopPropagation();
+          },
         }}
-      />
-    </Dropdown>
+        onOpenChange={setOpen}
+        trigger={['click']}
+      >
+        <ActionIcon
+          icon={MoreVertical}
+          size={{
+            blockSize: 28,
+            size: 16,
+          }}
+        />
+      </Dropdown>
+
+      {isAdmin && parentType === 'agent' && (
+        <ShareAgentModal
+          agentTitle={meta?.title}
+          onCancel={() => setShareModalOpen(false)}
+          onSuccess={async () => {
+            setShareModalOpen(false);
+            // Refresh sessions to reflect unshare changes
+            await useSessionStore.getState().refreshSessions();
+          }}
+          open={shareModalOpen}
+          sessionId={id}
+        />
+      )}
+    </>
   );
 });
 

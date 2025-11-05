@@ -729,5 +729,32 @@
     "bps": true,
     "folderMillis": 1761563458595,
     "hash": "c483b3ea859f78f687737229bd40f6fef5486aaf05fa20a8ea6961c2a8f0cc64"
+  },
+  {
+    "sql": [
+      "CREATE TABLE IF NOT EXISTS \"agent_shares\" (\n\t\"id\" text NOT NULL,\n\t\"agent_id\" text NOT NULL,\n\t\"shared_by_user_id\" text NOT NULL,\n\t\"shared_with_user_id\" text,\n\t\"is_global\" boolean DEFAULT false NOT NULL,\n\t\"permissions\" jsonb DEFAULT '{\"canEdit\":false,\"canUse\":true,\"canView\":true}'::jsonb,\n\t\"accessed_at\" timestamp with time zone DEFAULT now() NOT NULL,\n\t\"created_at\" timestamp with time zone DEFAULT now() NOT NULL,\n\t\"updated_at\" timestamp with time zone DEFAULT now() NOT NULL,\n\tCONSTRAINT \"agent_shares_id_pk\" PRIMARY KEY(\"id\")\n);\n",
+      "\nCREATE TABLE IF NOT EXISTS \"chat_group_shares\" (\n\t\"id\" text NOT NULL,\n\t\"chat_group_id\" text NOT NULL,\n\t\"shared_by_user_id\" text NOT NULL,\n\t\"shared_with_user_id\" text,\n\t\"is_global\" boolean DEFAULT false NOT NULL,\n\t\"permissions\" jsonb DEFAULT '{\"canEdit\":false,\"canUse\":true,\"canView\":true}'::jsonb,\n\t\"accessed_at\" timestamp with time zone DEFAULT now() NOT NULL,\n\t\"created_at\" timestamp with time zone DEFAULT now() NOT NULL,\n\t\"updated_at\" timestamp with time zone DEFAULT now() NOT NULL,\n\tCONSTRAINT \"chat_group_shares_id_pk\" PRIMARY KEY(\"id\")\n);\n",
+      "\nALTER TABLE \"users\" ADD COLUMN IF NOT EXISTS \"is_admin\" boolean DEFAULT false;",
+      "\nALTER TABLE \"agent_shares\" ADD CONSTRAINT \"agent_shares_agent_id_agents_id_fk\" FOREIGN KEY (\"agent_id\") REFERENCES \"public\".\"agents\"(\"id\") ON DELETE cascade ON UPDATE no action;",
+      "\nALTER TABLE \"agent_shares\" ADD CONSTRAINT \"agent_shares_shared_by_user_id_users_id_fk\" FOREIGN KEY (\"shared_by_user_id\") REFERENCES \"public\".\"users\"(\"id\") ON DELETE cascade ON UPDATE no action;",
+      "\nALTER TABLE \"agent_shares\" ADD CONSTRAINT \"agent_shares_shared_with_user_id_users_id_fk\" FOREIGN KEY (\"shared_with_user_id\") REFERENCES \"public\".\"users\"(\"id\") ON DELETE cascade ON UPDATE no action;",
+      "\nALTER TABLE \"chat_group_shares\" ADD CONSTRAINT \"chat_group_shares_chat_group_id_chat_groups_id_fk\" FOREIGN KEY (\"chat_group_id\") REFERENCES \"public\".\"chat_groups\"(\"id\") ON DELETE cascade ON UPDATE no action;",
+      "\nALTER TABLE \"chat_group_shares\" ADD CONSTRAINT \"chat_group_shares_shared_by_user_id_users_id_fk\" FOREIGN KEY (\"shared_by_user_id\") REFERENCES \"public\".\"users\"(\"id\") ON DELETE cascade ON UPDATE no action;",
+      "\nALTER TABLE \"chat_group_shares\" ADD CONSTRAINT \"chat_group_shares_shared_with_user_id_users_id_fk\" FOREIGN KEY (\"shared_with_user_id\") REFERENCES \"public\".\"users\"(\"id\") ON DELETE cascade ON UPDATE no action;"
+    ],
+    "bps": true,
+    "folderMillis": 1762178201314,
+    "hash": "7885236a0a1f176477860375bc1a00957ae75344173753df72eaa18f3f16f368"
+  },
+  {
+    "sql": [
+      "CREATE TABLE IF NOT EXISTS \"knowledge_base_shares\" (\n\t\"id\" text PRIMARY KEY NOT NULL,\n\t\"knowledge_base_id\" text NOT NULL,\n\t\"shared_by_user_id\" text NOT NULL,\n\t\"shared_with_user_id\" text,\n\t\"is_global\" boolean DEFAULT false NOT NULL,\n\t\"permissions\" text DEFAULT 'view_only',\n\t\"accessed_at\" timestamp with time zone,\n\t\"created_at\" timestamp with time zone DEFAULT now() NOT NULL,\n\t\"updated_at\" timestamp with time zone DEFAULT now() NOT NULL\n);\n",
+      "\nDO $$ BEGIN\n ALTER TABLE \"knowledge_base_shares\" ADD CONSTRAINT \"knowledge_base_shares_knowledge_base_id_knowledge_bases_id_fk\" FOREIGN KEY (\"knowledge_base_id\") REFERENCES \"public\".\"knowledge_bases\"(\"id\") ON DELETE cascade ON UPDATE no action;\nEXCEPTION\n WHEN duplicate_object THEN null;\nEND $$;\n",
+      "\nDO $$ BEGIN\n ALTER TABLE \"knowledge_base_shares\" ADD CONSTRAINT \"knowledge_base_shares_shared_by_user_id_users_id_fk\" FOREIGN KEY (\"shared_by_user_id\") REFERENCES \"public\".\"users\"(\"id\") ON DELETE cascade ON UPDATE no action;\nEXCEPTION\n WHEN duplicate_object THEN null;\nEND $$;\n",
+      "\nDO $$ BEGIN\n ALTER TABLE \"knowledge_base_shares\" ADD CONSTRAINT \"knowledge_base_shares_shared_with_user_id_users_id_fk\" FOREIGN KEY (\"shared_with_user_id\") REFERENCES \"public\".\"users\"(\"id\") ON DELETE cascade ON UPDATE no action;\nEXCEPTION\n WHEN duplicate_object THEN null;\nEND $$;\n\n"
+    ],
+    "bps": true,
+    "folderMillis": 1762244076679,
+    "hash": "be7b52d8f09196b7a7fc2e0ecf5d3992309fac022a37eb2786c1f07ae897fdb4"
   }
 ]

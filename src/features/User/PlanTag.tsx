@@ -2,7 +2,6 @@ import { Tag } from '@lobehub/ui';
 import { useTheme } from 'antd-style';
 import Link from 'next/link';
 import { memo } from 'react';
-import { useTranslation } from 'react-i18next';
 import urlJoin from 'url-join';
 
 import { OFFICIAL_URL } from '@/const/url';

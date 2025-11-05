@@ -192,17 +192,29 @@ export class FileModel {
     knowledgeBaseId,
     showFilesInKnowledgeBase,
   }: QueryFileListParams = {}) => {
-    // 1. query where
+    // 1. Check if querying a shared KB - if so, skip userId filter
+    let isSharedKB = false;
+    if (knowledgeBaseId) {
+      const { KnowledgeBaseSharingModel } = await import('./knowledgeBaseSharing');
+      const sharingModel = new KnowledgeBaseSharingModel(this.db, this.userId);
+      const accessibleKBIds = await sharingModel.getAccessibleKnowledgeBaseIds();
+
+      // Check if this KB is shared with user (not owned by user)
+      isSharedKB = accessibleKBIds.includes(knowledgeBaseId);
+    }
+
+    // 2. query where
     let whereClause = and(
       q ? ilike(files.name, `%${q}%`) : undefined,
-      eq(files.userId, this.userId),
+      // Skip userId filter for shared KB files
+      isSharedKB ? undefined : eq(files.userId, this.userId),
     );
     if (category && category !== FilesTabs.All) {
       const fileTypePrefix = this.getFileTypePrefix(category as FilesTabs);
       whereClause = and(whereClause, ilike(files.fileType, `${fileTypePrefix}%`));
     }
 
-    // 2. order part
+    // 3. order part
 
     let orderByClause = desc(files.createdAt);
     // create a map for sortable fields
@@ -219,7 +231,7 @@ export class FileModel {
       orderByClause = sortFunction(sortableFields[sorter as SortableField]);
     }
 
-    // 3. build query
+    // 4. build query
     let query = this.db
       .select({
         chunkTaskId: files.chunkTaskId,
@@ -234,7 +246,7 @@ export class FileModel {
       })
       .from(files);
 
-    // 4. add knowledge base query
+    // 5. add knowledge base query
     if (knowledgeBaseId) {
       // if knowledgeBaseId is provided, it means we are querying files in a knowledge-base
 
@@ -247,7 +259,7 @@ export class FileModel {
         ),
       );
     }
-    // 5.if we don't show files in knowledge base, we need exclude files in knowledge base
+    // 6.if we don't show files in knowledge base, we need exclude files in knowledge base
     else if (!showFilesInKnowledgeBase) {
       whereClause = and(
         whereClause,
@@ -267,8 +279,41 @@ export class FileModel {
     });
   };
 
-  findById = async (id: string, trx?: Transaction) => {
+  findById = async (id: string, trx?: Transaction, skipUserCheck: boolean = false) => {
     const database = trx || this.db;
+
+    // If skipUserCheck, allow access to files in shared KBs
+    if (skipUserCheck) {
+      const file = await database.query.files.findFirst({
+        where: eq(files.id, id),
+      });
+
+      if (!file) return null;
+
+      // Check if file belongs to a KB that is shared with this user
+      const kbFile = await database.query.knowledgeBaseFiles.findFirst({
+        where: eq(knowledgeBaseFiles.fileId, id),
+      });
+
+      if (kbFile) {
+        const { KnowledgeBaseSharingModel } = await import('./knowledgeBaseSharing');
+        const sharingModel = new KnowledgeBaseSharingModel(this.db, this.userId);
+        const accessibleKBIds = await sharingModel.getAccessibleKnowledgeBaseIds();
+
+        // Allow if KB is accessible (owned or shared)
+        if (accessibleKBIds.includes(kbFile.knowledgeBaseId)) {
+          return file;
+        }
+      }
+
+      // Check if file is owned by user
+      if (file.userId === this.userId) {
+        return file;
+      }
+
+      return null;
+    }
+
     return database.query.files.findFirst({
       where: and(eq(files.id, id), eq(files.userId, this.userId)),
     });

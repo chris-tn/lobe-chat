@@ -9,6 +9,7 @@ import {
   chatGroupsAgents,
 } from '../schemas';
 import { LobeChatDatabase } from '../type';
+import { ChatGroupSharingModel } from './agentSharing';
 
 export class ChatGroupModel {
   private userId: string;
@@ -17,6 +18,39 @@ export class ChatGroupModel {
   constructor(db: LobeChatDatabase, userId: string) {
     this.userId = userId;
     this.db = db;
+  }
+
+  /**
+   * Get all chat group IDs accessible to the user (owned + shared)
+   */
+  async queryAccessibleChatGroupIds(): Promise<string[]> {
+    const sharingModel = new ChatGroupSharingModel(this.db, this.userId);
+    const sharedGroupIds = await sharingModel.getAccessibleChatGroupIds();
+
+    // Get owned group IDs
+    const ownedGroups = await this.db
+      .select({ id: chatGroups.id })
+      .from(chatGroups)
+      .where(eq(chatGroups.userId, this.userId));
+
+    const ownedGroupIds = ownedGroups.map((g) => g.id);
+
+    // Combine and deduplicate
+    return [...new Set([...ownedGroupIds, ...sharedGroupIds])];
+  }
+
+  /**
+   * Query all accessible chat groups (owned + shared)
+   */
+  async queryAccessible(): Promise<ChatGroupItem[]> {
+    const accessibleIds = await this.queryAccessibleChatGroupIds();
+
+    if (accessibleIds.length === 0) return [];
+
+    return this.db.query.chatGroups.findMany({
+      orderBy: [desc(chatGroups.updatedAt)],
+      where: inArray(chatGroups.id, accessibleIds),
+    });
   }
   // ******* Query Methods ******* //
 

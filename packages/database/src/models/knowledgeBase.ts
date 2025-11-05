@@ -53,7 +53,13 @@ export class KnowledgeBaseModel {
   };
   // query
   query = async () => {
-    const data = await this.db
+    // Get accessible knowledge base IDs (owned + shared)
+    const {KnowledgeBaseSharingModel} = await import('./knowledgeBaseSharing');
+    const sharingModel = new KnowledgeBaseSharingModel(this.db, this.userId);
+    const sharedKbIds = await sharingModel.getAccessibleKnowledgeBaseIds();
+
+    // Query owned KBs
+    const ownedData = await this.db
       .select({
         avatar: knowledgeBases.avatar,
         createdAt: knowledgeBases.createdAt,
@@ -69,13 +75,59 @@ export class KnowledgeBaseModel {
       .where(eq(knowledgeBases.userId, this.userId))
       .orderBy(desc(knowledgeBases.updatedAt));
 
-    return data as KnowledgeBaseItem[];
+    // Query shared KBs (if any)
+    let sharedData: KnowledgeBaseItem[] = [];
+    if (sharedKbIds.length > 0) {
+      const { inArray } = await import('drizzle-orm');
+      sharedData = (await this.db
+        .select({
+          avatar: knowledgeBases.avatar,
+          createdAt: knowledgeBases.createdAt,
+          description: knowledgeBases.description,
+          id: knowledgeBases.id,
+          isPublic: knowledgeBases.isPublic,
+          name: knowledgeBases.name,
+          settings: knowledgeBases.settings,
+          type: knowledgeBases.type,
+          updatedAt: knowledgeBases.updatedAt,
+        })
+        .from(knowledgeBases)
+        .where(inArray(knowledgeBases.id, sharedKbIds))
+        .orderBy(desc(knowledgeBases.updatedAt))) as KnowledgeBaseItem[];
+    }
+
+    // Merge and deduplicate (owned + shared)
+    const allKbs = [...ownedData, ...sharedData];
+    const uniqueKbs = Array.from(
+      new Map(allKbs.map((kb) => [kb.id, kb])).values(),
+    ) as KnowledgeBaseItem[];
+
+    return uniqueKbs.sort(
+      (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
+    );
   };
 
   findById = async (id: string) => {
-    return this.db.query.knowledgeBases.findFirst({
+    // First, try to find KB owned by user
+    const ownedKB = await this.db.query.knowledgeBases.findFirst({
       where: and(eq(knowledgeBases.id, id), eq(knowledgeBases.userId, this.userId)),
     });
+
+    if (ownedKB) return ownedKB;
+
+    // If not owned, check if KB is shared with this user
+    const { KnowledgeBaseSharingModel } = await import('./knowledgeBaseSharing');
+    const sharingModel = new KnowledgeBaseSharingModel(this.db, this.userId);
+    const accessibleKBIds = await sharingModel.getAccessibleKnowledgeBaseIds();
+
+    if (accessibleKBIds.includes(id)) {
+      // User has access to this KB via sharing, return it without userId filter
+      return this.db.query.knowledgeBases.findFirst({
+        where: eq(knowledgeBases.id, id),
+      });
+    }
+
+    return undefined;
   };
 
   // update

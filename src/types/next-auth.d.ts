@@ -7,9 +7,11 @@ declare module 'next-auth' {
   interface Session {
     user: {
       firstName?: string;
+      isAdmin?: boolean;
     } & DefaultSession['user'];
   }
   interface User {
+    isAdmin?: boolean;
     providerAccountId?: string;
   }
   /**
@@ -21,6 +23,7 @@ declare module 'next-auth' {
 declare module '@auth/core/jwt' {
   /** Returned by the `jwt` callback and `auth`, when using JWT sessions */
   interface JWT {
+    isAdmin?: boolean;
     userId: string;
   }
 }

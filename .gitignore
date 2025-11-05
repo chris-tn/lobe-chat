@@ -1,6 +1,7 @@
 # Gitignore for LobeHub
 ################################################################
-
+data
+s3_data
 # System files
 .DS_Store
 Thumbs.db

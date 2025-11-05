@@ -6,6 +6,7 @@ import { insertChatGroupSchema } from '@/database/schemas/chatGroup';
 import { ChatGroupConfig } from '@/database/types/chatGroup';
 import { authedProcedure, router } from '@/libs/trpc/lambda';
 import { serverDatabase } from '@/libs/trpc/lambda/middleware';
+import { adminAuth } from '@/libs/trpc/middleware/adminAuth';
 
 const groupProcedure = authedProcedure.use(serverDatabase).use(async (opts) => {
   const { ctx } = opts;
@@ -16,6 +17,19 @@ const groupProcedure = authedProcedure.use(serverDatabase).use(async (opts) => {
     },
   });
 });
+
+const adminGroupProcedure = authedProcedure
+  .use(serverDatabase)
+  .use(adminAuth)
+  .use(async (opts) => {
+    const { ctx } = opts;
+
+    return opts.next({
+      ctx: {
+        chatGroupModel: new ChatGroupModel(ctx.serverDB, ctx.userId),
+      },
+    });
+  });
 
 const normalizeGroupConfig = (config?: ChatGroupConfig | null): ChatGroupConfig | undefined =>
   config
@@ -37,7 +51,7 @@ export const groupRouter = router({
       return ctx.chatGroupModel.addAgentsToGroup(input.groupId, input.agentIds);
     }),
 
-  createGroup: groupProcedure
+  createGroup: adminGroupProcedure
     .input(insertChatGroupSchema.omit({ userId: true }))
     .mutation(async ({ input, ctx }) => {
       return ctx.chatGroupModel.create({

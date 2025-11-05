@@ -1,14 +1,13 @@
 import { Icon } from '@lobehub/ui';
 import { TabBar, type TabBarProps } from '@lobehub/ui/mobile';
 import { createStyles } from 'antd-style';
-import { Bot, MessageSquare, User } from 'lucide-react';
+import { MessageSquare } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { rgba } from 'polished';
 import { memo, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { SidebarTabKey } from '@/store/global/initialState';
-import { featureFlagsSelectors, useServerConfigStore } from '@/store/serverConfig';
 
 const useStyles = createStyles(({ css, token }) => ({
   active: css`

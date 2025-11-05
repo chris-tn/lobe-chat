@@ -301,6 +301,28 @@
     "sorting": "Đang cập nhật sắp xếp nhóm...",
     "tooLong": "Tên nhóm phải có độ dài từ 1-20 ký tự"
   },
+  "share": {
+    "add": "Thêm chia sẻ",
+    "addNewShares": "Thêm chia sẻ mới",
+    "allUsersShared": "Tất cả người dùng đã được chia sẻ",
+    "confirm": "Chia sẻ",
+    "currentShares": "Danh sách chia sẻ hiện tại",
+    "failed": "Chia sẻ thất bại",
+    "globalShare": "Chia sẻ toàn cục",
+    "globalShareDesc": "Chia sẻ với tất cả người dùng",
+    "globalSuccess": "Chia sẻ toàn cục thành công",
+    "globalTag": "Toàn cục",
+    "selectUsers": "Chọn người dùng",
+    "selectUsersPlaceholder": "Vui lòng chọn người dùng để chia sẻ",
+    "sharedBy": "Được chia sẻ bởi {{name}}",
+    "sharedGlobal": "Chia sẻ toàn cục",
+    "sharedWithEveryone": "Đã chia sẻ với mọi người",
+    "success": "Chia sẻ thành công với {{count}} người dùng",
+    "title": "Chia sẻ \"{{title}}\"",
+    "unshare": "Hủy chia sẻ",
+    "unshareGlobalSuccess": "Đã hủy chia sẻ toàn cục",
+    "unshareSuccess": "Hủy chia sẻ thành công"
+  },
   "shareModal": {
     "copy": "Sao chép",
     "download": "Tải xuống ảnh chụp màn hình",

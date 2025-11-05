@@ -16,6 +16,7 @@ export interface UserAuthState {
   clerkSignIn?: (props?: SignInProps) => void;
   clerkSignOut?: SignOut;
   clerkUser?: UserResource;
+  isAdmin?: boolean;
   isLoaded?: boolean;
 
   isSignedIn?: boolean;
@@ -25,4 +26,6 @@ export interface UserAuthState {
   user?: LobeUser;
 }
 
-export const initialAuthState: UserAuthState = {};
+export const initialAuthState: UserAuthState = {
+  isAdmin: false,
+};

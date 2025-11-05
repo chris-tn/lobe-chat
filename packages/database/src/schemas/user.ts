@@ -19,6 +19,7 @@ export const users = pgTable('users', {
   fullName: text('full_name'),
 
   isOnboarded: boolean('is_onboarded').default(false),
+  isAdmin: boolean('is_admin').default(false),
   // Time user was created in Clerk
   clerkCreatedAt: timestamptz('clerk_created_at'),
 

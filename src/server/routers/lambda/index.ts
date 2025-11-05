@@ -4,6 +4,7 @@
 import { publicProcedure, router } from '@/libs/trpc/lambda';
 
 import { agentRouter } from './agent';
+import { agentSharingRouter, chatGroupSharingRouter } from './agentSharing';
 import { aiChatRouter } from './aiChat';
 import { aiModelRouter } from './aiModel';
 import { aiProviderRouter } from './aiProvider';
@@ -34,10 +35,12 @@ import { userRouter } from './user';
 
 export const lambdaRouter = router({
   agent: agentRouter,
+  agentSharing: agentSharingRouter,
   aiChat: aiChatRouter,
   aiModel: aiModelRouter,
   aiProvider: aiProviderRouter,
   apiKey: apiKeyRouter,
+  chatGroupSharing: chatGroupSharingRouter,
   chunk: chunkRouter,
   comfyui: comfyuiRouter,
   config: configRouter,

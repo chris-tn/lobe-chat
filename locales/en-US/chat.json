@@ -301,6 +301,28 @@
     "sorting": "Group sorting updating...",
     "tooLong": "Group name length should be between 1-20"
   },
+  "share": {
+    "add": "Add Share",
+    "addNewShares": "Add New Shares",
+    "allUsersShared": "All users already shared",
+    "confirm": "Share",
+    "currentShares": "Current Shares",
+    "failed": "Share failed",
+    "globalShare": "Global Share",
+    "globalShareDesc": "Share with all users",
+    "globalSuccess": "Successfully shared globally",
+    "globalTag": "Global",
+    "selectUsers": "Select Users",
+    "selectUsersPlaceholder": "Please select users to share with",
+    "sharedBy": "Shared by {{name}}",
+    "sharedGlobal": "Global Sharing",
+    "sharedWithEveryone": "Shared with everyone",
+    "success": "Successfully shared with {{count}} users",
+    "title": "Share \"{{title}}\"",
+    "unshare": "Unshare",
+    "unshareGlobalSuccess": "Global sharing removed",
+    "unshareSuccess": "Unshare successful"
+  },
   "shareModal": {
     "copy": "Copy",
     "download": "Download Screenshot",

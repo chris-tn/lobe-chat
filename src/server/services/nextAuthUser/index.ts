@@ -101,7 +101,7 @@ export class NextAuthUserService {
   };
 
   createUser: NonNullable<Adapter['createUser']> = async (user) => {
-    const { id, name, email, emailVerified, image, providerAccountId } = user;
+    const { id, email, providerAccountId } = user;
     // return the user if it already exists
     let existingUser =
       email && typeof email === 'string' && email.trim()
@@ -112,7 +112,14 @@ export class NextAuthUserService {
       existingUser = await UserModel.findById(this.db, providerAccountId);
     }
     if (existingUser) {
-      const adapterUser = mapLobeUserToAdapterUser(existingUser);
+      // Update existing user with fresh data from provider (including isAdmin)
+      const userModel = new UserModel(this.db, existingUser.id);
+      const updatedFields = partialMapAdapterUserToLobeUser(user);
+      if (Object.keys(updatedFields).length > 0) {
+        await userModel.updateUser(updatedFields);
+      }
+      // Merge fresh data with existing user
+      const adapterUser = mapLobeUserToAdapterUser({ ...existingUser, ...updatedFields });
       return adapterUser;
     }
 
@@ -120,21 +127,22 @@ export class NextAuthUserService {
     // Use id from provider if it exists, otherwise use id assigned by next-auth
     // ref: https://github.com/lobehub/lobe-chat/pull/2935
     const uid = providerAccountId ?? id;
-    await UserModel.createUser(
-      this.db,
-      mapAdapterUserToLobeUser({
-        email,
-        emailVerified,
-        // Use providerAccountId as userid to identify if the user exists in a SSO provider
-        id: uid,
-        image,
-        name,
-      }),
-    );
 
-    // 3. Create an inbox session for the user
-    const agentService = new AgentService(this.db, uid);
-    await agentService.createInbox();
+    // Pass full user object to preserve isAdmin field
+    const lobeUser = mapAdapterUserToLobeUser({
+      ...user, // ← Pass full user object including isAdmin
+      // Use providerAccountId as userid to identify if the user exists in a SSO provider
+      id: uid,
+    });
+
+    await UserModel.createUser(this.db, lobeUser);
+
+    // 3. Create an inbox session ONLY for admin users
+    // Non-admin users can only use shared agents
+    if (lobeUser.isAdmin) {
+      const agentService = new AgentService(this.db, uid);
+      await agentService.createInbox();
+    }
 
     return { ...user, id: uid };
   };

@@ -34,6 +34,28 @@ export const fileRouter = router({
   createFile: fileProcedure
     .input(UploadFileSchema.omit({ url: true }).extend({ url: z.string() }))
     .mutation(async ({ ctx, input }) => {
+      // If uploading to a KB, check if user owns it (prevent upload to shared KBs)
+      if (input.knowledgeBaseId) {
+        const { KnowledgeBaseModel } = await import('@/database/models/knowledgeBase');
+        const kbModel = new KnowledgeBaseModel(ctx.serverDB, ctx.userId);
+        const kb = await kbModel.findById(input.knowledgeBaseId);
+
+        if (!kb) {
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: 'Knowledge base not found',
+          });
+        }
+
+        // Only KB owner can upload files
+        if (kb.userId !== ctx.userId) {
+          throw new TRPCError({
+            code: 'FORBIDDEN',
+            message: 'Only the knowledge base owner can upload files',
+          });
+        }
+      }
+
       const { isExist } = await ctx.fileModel.checkHash(input.hash!);
 
       const { id } = await ctx.fileModel.create(
@@ -59,7 +81,8 @@ export const fileRouter = router({
       }),
     )
     .query(async ({ ctx, input }) => {
-      const item = await ctx.fileModel.findById(input.id);
+      // Allow access to files in shared KBs
+      const item = await ctx.fileModel.findById(input.id, undefined, true);
       if (!item) throw new TRPCError({ code: 'BAD_REQUEST', message: 'File not found' });
 
       return { ...item, url: await ctx.fileService.getFullFileUrl(item?.url) };
@@ -72,7 +95,8 @@ export const fileRouter = router({
       }),
     )
     .query(async ({ ctx, input }): Promise<FileListItem | undefined> => {
-      const item = await ctx.fileModel.findById(input.id);
+      // Allow access to files in shared KBs
+      const item = await ctx.fileModel.findById(input.id, undefined, true);
 
       if (!item) throw new TRPCError({ code: 'NOT_FOUND', message: 'File not found' });
 

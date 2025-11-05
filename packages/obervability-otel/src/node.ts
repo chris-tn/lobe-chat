@@ -1,4 +1,5 @@
 import { DiagConsoleLogger, DiagLogLevel, diag } from '@opentelemetry/api';
+// @ts-ignore - Optional dependency not installed in Docker build
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
 import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-http';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
@@ -9,9 +10,7 @@ import { PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics';
 import { NodeSDK } from '@opentelemetry/sdk-node';
 import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from '@opentelemetry/semantic-conventions';
 
-
-
-export function register(options?: { debug?: true | DiagLogLevel, version?: string; }) {
+export function register(options?: { debug?: true | DiagLogLevel; version?: string }) {
   const attributes: Record<string, string> = {
     [ATTR_SERVICE_NAME]: 'lobe-chat',
   };
@@ -29,6 +28,7 @@ export function register(options?: { debug?: true | DiagLogLevel, version?: stri
     instrumentations: [
       new PgInstrumentation(),
       new HttpInstrumentation(),
+      // @ts-ignore - Optional dependency not installed in Docker build
       getNodeAutoInstrumentations(),
     ],
     metricReader: new PeriodicExportingMetricReader({
@@ -41,4 +41,4 @@ export function register(options?: { debug?: true | DiagLogLevel, version?: stri
   sdk.start();
 }
 
-export {DiagLogLevel} from '@opentelemetry/api';
+export { DiagLogLevel } from '@opentelemetry/api';

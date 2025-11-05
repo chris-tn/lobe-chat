@@ -82,15 +82,15 @@ export const DEFAULT_FEATURE_FLAGS: IFeatureFlags = {
   api_key_manage: false,
 
   // Disable agent creation and editing - use predefined assistants only
-  create_session: false,
-  edit_agent: false,
+  create_session: true,
+  edit_agent: true,
 
   // Disable plugins, market and image generation
-  plugins: false,
+  plugins: true,
   dalle: false,
   ai_image: false,
 
-  check_updates: true,
+  check_updates: false,
   welcome_suggest: true,
   token_counter: true,
 
@@ -107,7 +107,7 @@ export const DEFAULT_FEATURE_FLAGS: IFeatureFlags = {
   speech_to_text: true,
   changelog: true,
 
-  group_chat: false,
+  group_chat: true,
 
   // Hide external links
   commercial_hide_github: true,

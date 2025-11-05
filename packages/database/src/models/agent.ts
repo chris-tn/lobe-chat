@@ -9,6 +9,7 @@ import {
   knowledgeBases,
 } from '../schemas';
 import { LobeChatDatabase } from '../type';
+import { AgentSharingModel } from './agentSharing';
 
 export class AgentModel {
   private userId: string;
@@ -17,6 +18,25 @@ export class AgentModel {
   constructor(db: LobeChatDatabase, userId: string) {
     this.userId = userId;
     this.db = db;
+  }
+
+  /**
+   * Get all agent IDs accessible to the user (owned + shared)
+   */
+  async queryAccessibleAgentIds(): Promise<string[]> {
+    const sharingModel = new AgentSharingModel(this.db, this.userId);
+    const sharedAgentIds = await sharingModel.getAccessibleAgentIds();
+
+    // Get owned agent IDs
+    const ownedAgents = await this.db
+      .select({ id: agents.id })
+      .from(agents)
+      .where(eq(agents.userId, this.userId));
+
+    const ownedAgentIds = ownedAgents.map((a) => a.id);
+
+    // Combine and deduplicate
+    return [...new Set([...ownedAgentIds, ...sharedAgentIds])];
   }
 
   getAgentConfigById = async (id: string) => {

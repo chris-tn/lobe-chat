@@ -34,8 +34,12 @@ const UserUpdater = memo(() => {
         id: nextUser.id,
       } as LobeUser;
 
-      // 更新用户相关数据
-      useUserStore.setState({ nextUser: nextUser, user: lobeUser });
+      // 更新用户相关数据，包括 isAdmin 状态
+      useUserStore.setState({
+        isAdmin: nextUser.isAdmin ?? false,
+        nextUser: nextUser,
+        user: lobeUser,
+      });
     }
   }, [nextUser]);
   return null;

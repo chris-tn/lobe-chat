@@ -2,8 +2,10 @@
 
 import { ChatHeader } from '@lobehub/ui/chat';
 import { memo } from 'react';
+import { Flexbox } from 'react-layout-kit';
 
 import FilesSearchBar from './FilesSearchBar';
+import ShareKnowledgeBaseButton from './ShareKnowledgeBaseButton';
 import TogglePanelButton from './TogglePanelButton';
 import UploadFileButton from './UploadFileButton';
 
@@ -16,7 +18,12 @@ const Header = memo<{ knowledgeBaseId?: string }>(({ knowledgeBaseId }) => {
           <FilesSearchBar />
         </>
       }
-      right={<UploadFileButton knowledgeBaseId={knowledgeBaseId} />}
+      right={
+        <Flexbox gap={8} horizontal>
+          <ShareKnowledgeBaseButton knowledgeBaseId={knowledgeBaseId} />
+          <UploadFileButton knowledgeBaseId={knowledgeBaseId} />
+        </Flexbox>
+      }
       styles={{
         left: { padding: 0 },
       }}

@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { AgentModel } from '@/database/models/agent';
 import { ChatGroupModel } from '@/database/models/chatGroup';
 import { SessionModel } from '@/database/models/session';
 import { SessionGroupModel } from '@/database/models/sessionGroup';
@@ -7,10 +8,11 @@ import { insertAgentSchema, insertSessionSchema } from '@/database/schemas';
 import { getServerDB } from '@/database/server';
 import { authedProcedure, publicProcedure, router } from '@/libs/trpc/lambda';
 import { serverDatabase } from '@/libs/trpc/lambda/middleware';
+import { adminAuth } from '@/libs/trpc/middleware/adminAuth';
 import { AgentChatConfigSchema } from '@/types/agent';
 import { LobeMetaDataSchema } from '@/types/meta';
 import { BatchTaskResult } from '@/types/service';
-import { ChatSessionList, LobeGroupSession } from '@/types/session';
+import { ChatSessionList, LobeGroupSession, LobeSessionType } from '@/types/session';
 
 const sessionProcedure = authedProcedure.use(serverDatabase).use(async (opts) => {
   const { ctx } = opts;
@@ -22,6 +24,20 @@ const sessionProcedure = authedProcedure.use(serverDatabase).use(async (opts) =>
     },
   });
 });
+
+const adminSessionProcedure = authedProcedure
+  .use(serverDatabase)
+  .use(adminAuth)
+  .use(async (opts) => {
+    const { ctx } = opts;
+
+    return opts.next({
+      ctx: {
+        sessionGroupModel: new SessionGroupModel(ctx.serverDB, ctx.userId),
+        sessionModel: new SessionModel(ctx.serverDB, ctx.userId),
+      },
+    });
+  });
 
 export const sessionRouter = router({
   batchCreateSessions: sessionProcedure
@@ -72,7 +88,7 @@ export const sessionRouter = router({
       return ctx.sessionModel.count(input);
     }),
 
-  createSession: sessionProcedure
+  createSession: adminSessionProcedure
     .input(
       z.object({
         config: insertAgentSchema
@@ -102,21 +118,54 @@ export const sessionRouter = router({
     const serverDB = await getServerDB();
     const sessionModel = new SessionModel(serverDB, ctx.userId!);
     const chatGroupModel = new ChatGroupModel(serverDB, ctx.userId!);
+    const agentModel = new AgentModel(serverDB, ctx.userId!);
 
-    const { sessions, sessionGroups } = await sessionModel.queryWithGroups();
+    // Query owned sessions first
+    const { sessions } = await sessionModel.queryWithGroups();
+
+    // Get accessible agent IDs (owned + shared)
+    const accessibleAgentIds = await agentModel.queryAccessibleAgentIds();
+
+    // Get agent IDs that already have sessions for this user
+    const existingAgentIds = new Set(
+      sessions
+        .filter((s: any) => s.type === LobeSessionType.Agent)
+        .map((s: any) => s.config?.id)
+        .filter(Boolean),
+    );
+
+    // Find shared agents without sessions - create real sessions for them
+    const sharedAgentsWithoutSessions = accessibleAgentIds.filter(
+      (agentId) => !existingAgentIds.has(agentId),
+    );
+
+    // Create real sessions for shared agents (not virtual sessions)
+    for (const agentId of sharedAgentsWithoutSessions) {
+      try {
+        await sessionModel.createSessionForExistingAgent(agentId);
+      } catch (error) {
+        console.error(`Failed to create session for agent ${agentId}:`, error);
+      }
+    }
+
+    // Re-query sessions to include newly created ones
+    const { sessions: updatedSessions, sessionGroups } = await sessionModel.queryWithGroups();
+
+    // Get accessible chat groups (owned + shared) with member details
     const chatGroups = await chatGroupModel.queryWithMemberDetails();
 
+    // Map chat groups to group sessions
     const groupSessions: LobeGroupSession[] = chatGroups.map((group) => {
       const { title, description, avatar, backgroundColor, groupId, ...rest } = group;
       return {
         ...rest,
-        group: groupId, // Map groupId to group for consistent API
+        group: groupId || undefined,
         meta: { avatar, backgroundColor, description, title },
-        type: 'group',
+        type: 'group' as const,
       };
     });
 
-    const allSessions = [...sessions, ...groupSessions].sort(
+    const allSessions = [...updatedSessions, ...groupSessions].sort(
       (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
     );
 
@@ -147,6 +196,8 @@ export const sessionRouter = router({
   removeSession: sessionProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input, ctx }) => {
+      // Check ownership - session belongs to user (enforced by SessionModel using userId)
+      // SessionModel.delete() already filters by userId, so non-owners can't delete
       return ctx.sessionModel.delete(input.id);
     }),
 
@@ -164,6 +215,8 @@ export const sessionRouter = router({
       }),
     )
     .mutation(async ({ input, ctx }) => {
+      // Check ownership - session belongs to user (enforced by SessionModel using userId)
+      // SessionModel.update() already filters by userId, so non-owners can't update
       return ctx.sessionModel.update(input.id, input.value);
     }),
   updateSessionChatConfig: sessionProcedure

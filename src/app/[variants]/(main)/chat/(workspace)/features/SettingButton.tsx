@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 
 import { DESKTOP_HEADER_ICON_SIZE, MOBILE_HEADER_ICON_SIZE } from '@/const/layoutTokens';
 import { useOpenChatSettings } from '@/hooks/useInterceptingRoutes';
+import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { useChatGroupStore } from '@/store/chatGroup';
 import { useSessionStore } from '@/store/session';
 import { sessionSelectors } from '@/store/session/selectors';
@@ -25,7 +26,8 @@ const AgentTeamSettings = dynamic(() => import('./AgentTeamSettings'), {
 
 const SettingButton = memo<{ mobile?: boolean }>(({ mobile }) => {
   const hotkey = useUserStore(settingsSelectors.getHotkeyById(HotkeyEnum.OpenChatSettings));
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'chat']);
+  const isAdmin = useIsAdmin();
   const id = useSessionStore((s) => s.activeId);
   const isGroupSession = useSessionStore(sessionSelectors.isCurrentSessionGroupSession);
 
@@ -34,15 +36,30 @@ const SettingButton = memo<{ mobile?: boolean }>(({ mobile }) => {
   const openChatSettings = useOpenChatSettings();
   const openGroupSettings = useChatGroupStore((s) => s.toggleGroupSetting);
 
+  const handleClick = () => {
+    if (!isAdmin) return;
+
+    if (isGroupSession) {
+      openGroupSettings(true);
+    } else {
+      openChatSettings();
+    }
+  };
+
   return (
     <>
       <ActionIcon
+        disabled={!isAdmin}
         icon={AlignJustify}
-        onClick={() => (isGroupSession ? openGroupSettings(true) : openChatSettings())}
+        onClick={handleClick}
         size={mobile ? MOBILE_HEADER_ICON_SIZE : DESKTOP_HEADER_ICON_SIZE}
-        title={t('openChatSettings.title', { ns: 'hotkey' })}
+        title={
+          !isAdmin
+            ? t('onlyAdminCanCreate', { ns: 'chat' })
+            : t('openChatSettings.title', { ns: 'hotkey' })
+        }
         tooltipProps={{
-          hotkey,
+          hotkey: isAdmin ? hotkey : undefined,
           placement: 'bottom',
         }}
       />

@@ -1,4 +1,5 @@
 export * from './agent';
+export * from './agentSharing';
 export * from './aiInfra';
 export * from './apiKey';
 export * from './asyncTask';
@@ -6,6 +7,7 @@ export * from './chatGroup';
 export * from './document';
 export * from './file';
 export * from './generation';
+export * from './knowledgeBaseSharing';
 export * from './message';
 export * from './nextauth';
 export * from './oidc';

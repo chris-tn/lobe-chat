@@ -6,6 +6,7 @@ import { MouseEvent, memo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import useMergeState from 'use-merge-value';
 
+import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { useAgentStore } from '@/store/agent';
 import { agentSelectors } from '@/store/agent/selectors';
 import { useGlobalStore } from '@/store/global';
@@ -18,6 +19,7 @@ import SystemRole from './SystemRole';
 
 const AgentConfig = memo(() => {
   const [editing, setEditing] = useState(false);
+  const isAdmin = useIsAdmin();
 
   const [init, sessionId] = useSessionStore((s) => [
     sessionSelectors.isSomeSessionActive(s),
@@ -37,12 +39,12 @@ const AgentConfig = memo(() => {
     value: showSystemRole,
   });
 
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'chat']);
 
   const isLoading = !init || isAgentConfigLoading;
 
   const handleOpenWithEdit = (e: MouseEvent) => {
-    if (isLoading) return;
+    if (isLoading || !isAdmin) return;
 
     e.stopPropagation();
     setEditing(true);
@@ -52,7 +54,13 @@ const AgentConfig = memo(() => {
   return (
     <ConfigLayout
       actions={
-        <ActionIcon icon={Edit} onClick={handleOpenWithEdit} size={'small'} title={t('edit')} />
+        <ActionIcon
+          disabled={!isAdmin}
+          icon={Edit}
+          onClick={handleOpenWithEdit}
+          size={'small'}
+          title={!isAdmin ? t('onlyAdminCanCreate', { ns: 'chat' }) : t('edit')}
+        />
       }
       expandedHeight={200}
       headerStyle={{ cursor: 'pointer' }}

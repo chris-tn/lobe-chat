@@ -1,8 +1,7 @@
 import { ActionIcon, ActionIconProps } from '@lobehub/ui';
-import { FlaskConical, Github } from 'lucide-react';
+import { Github } from 'lucide-react';
 import Link from 'next/link';
 import { memo } from 'react';
-import { useTranslation } from 'react-i18next';
 import { Flexbox } from 'react-layout-kit';
 
 import { GITHUB } from '@/const/url';

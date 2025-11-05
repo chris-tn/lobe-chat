@@ -13,8 +13,6 @@ import type { UserSettings } from '@/types/user/settings';
 import { merge } from '@/utils/merge';
 import { setNamespace } from '@/utils/storeDebug';
 
-import { preferenceSelectors } from '../preference/selectors';
-
 const n = setNamespace('common');
 
 const GET_USER_STATE_KEY = 'initUserState';
@@ -89,14 +87,14 @@ export const createCommonSlice: StateCreator<
             const user =
               data.avatar || data.userId
                 ? merge(get().user, {
-                  avatar: data.avatar,
-                  email: data.email,
-                  firstName: data.firstName,
-                  fullName: data.fullName,
-                  id: data.userId,
-                  latestName: data.lastName,
-                  username: data.username,
-                } as LobeUser)
+                    avatar: data.avatar,
+                    email: data.email,
+                    firstName: data.firstName,
+                    fullName: data.fullName,
+                    id: data.userId,
+                    latestName: data.lastName,
+                    username: data.username,
+                  } as LobeUser)
                 : get().user;
 
             set(

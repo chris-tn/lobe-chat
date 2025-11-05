@@ -8,6 +8,7 @@ import { Flexbox } from 'react-layout-kit';
 import { useNavigate } from 'react-router-dom';
 
 import { useCreateNewModal } from '@/features/KnowledgeBaseModal';
+import { useIsAdmin } from '@/hooks/useIsAdmin';
 
 import KnowledgeBaseList from '../../../components/KnowledgeBaseList';
 
@@ -18,15 +19,18 @@ const useStyles = createStyles(({ css, token }) => ({
 }));
 
 const KnowledgeBase = () => {
-  const { t } = useTranslation('file');
+  const { t } = useTranslation(['file', 'chat']);
   const { styles } = useStyles();
   const navigate = useNavigate();
+  const isAdmin = useIsAdmin();
 
   const [showList, setShowList] = useState(true);
 
   const { open } = useCreateNewModal();
 
   const handleCreate = () => {
+    if (!isAdmin) return;
+
     open({
       onSuccess: (id) => {
         navigate(`/bases/${id}`);
@@ -54,10 +58,11 @@ const KnowledgeBase = () => {
           <div style={{ lineHeight: '14px' }}>{t('knowledgeBase.title')}</div>
         </Flexbox>
         <ActionIcon
+          disabled={!isAdmin}
           icon={PlusIcon}
           onClick={handleCreate}
           size={'small'}
-          title={t('knowledgeBase.new')}
+          title={!isAdmin ? t('onlyAdminCanCreate', { ns: 'chat' }) : t('knowledgeBase.new')}
         />
       </Flexbox>
 
