@@ -9,6 +9,64 @@ import {
   chatGroupShares,
 } from '../schemas';
 import { LobeChatDatabase } from '../type';
+import { PluginModel } from './plugin';
+
+/**
+ * Helper function to copy all plugins from agent owner to target users
+ * Copies both regular plugins and custom plugins that are used by the agent
+ */
+async function copyPluginsFromAgent(
+  db: LobeChatDatabase,
+  agentId: string,
+  targetUserIds: string[],
+): Promise<void> {
+  // 1. Get agent to find owner and plugins
+  const { agents } = await import('../schemas');
+  const agent = await db.query.agents.findFirst({
+    columns: { plugins: true, userId: true },
+    where: eq(agents.id, agentId),
+  });
+
+  if (!agent || !agent.plugins || agent.plugins.length === 0) {
+    return;
+  }
+
+  // 2. Get owner's installed plugins
+  const ownerPluginModel = new PluginModel(db, agent.userId);
+  const ownerPlugins = await ownerPluginModel.query();
+
+  // Filter plugins that are in agent's plugins list (both regular and custom plugins, exclude builtin)
+  const pluginsToCopy = ownerPlugins.filter(
+    (plugin) =>
+      agent.plugins?.includes(plugin.identifier) &&
+      (plugin.type === 'plugin' || plugin.type === 'customPlugin'),
+  );
+
+  if (pluginsToCopy.length === 0) {
+    return;
+  }
+
+  // 3. Copy each plugin to target users
+  for (const targetUserId of targetUserIds) {
+    const targetPluginModel = new PluginModel(db, targetUserId);
+
+    for (const plugin of pluginsToCopy) {
+      // Check if plugin already exists for target user
+      const existingPlugin = await targetPluginModel.findById(plugin.identifier);
+
+      if (!existingPlugin) {
+        // Copy the plugin with its original type (plugin or customPlugin)
+        await targetPluginModel.create({
+          customParams: plugin.customParams,
+          identifier: plugin.identifier,
+          manifest: plugin.manifest,
+          settings: plugin.settings,
+          type: plugin.type as 'plugin' | 'customPlugin',
+        });
+      }
+    }
+  }
+}
 
 export class AgentSharingModel {
   private userId: string;
@@ -107,8 +165,12 @@ export class AgentSharingModel {
 
   /**
    * Share an agent with specific users (admin only)
+   * Also copies all plugins (both regular and custom) from agent owner to target users
    */
   async shareAgent(agentId: string, targetUserIds: string[]): Promise<AgentShareItem[]> {
+    // Copy plugins before creating share records
+    await copyPluginsFromAgent(this.db, agentId, targetUserIds);
+
     const shares: NewAgentShare[] = targetUserIds.map((targetUserId) => ({
       agentId,
       isGlobal: false,
@@ -121,8 +183,20 @@ export class AgentSharingModel {
 
   /**
    * Share an agent globally with all users (admin only)
+   * Also copies all plugins (both regular and custom) from agent owner to all existing users
    */
   async shareGlobalAgent(agentId: string): Promise<AgentShareItem> {
+    // Get all users to copy plugins to
+    const { users } = await import('../schemas');
+    const allUsers = await this.db.select({ id: users.id }).from(users);
+
+    const allUserIds = allUsers.map((u) => u.id).filter((id) => id !== this.userId);
+
+    // Copy plugins to all users
+    if (allUserIds.length > 0) {
+      await copyPluginsFromAgent(this.db, agentId, allUserIds);
+    }
+
     const [share] = await this.db
       .insert(agentShares)
       .values({
@@ -247,6 +321,30 @@ export class ChatGroupSharingModel {
     this.db = db;
   }
 
+  /**
+   * Copy all plugins from all agents in a chat group to target users
+   */
+  private async copyPluginsFromChatGroup(
+    chatGroupId: string,
+    targetUserIds: string[],
+  ): Promise<void> {
+    // 1. Get all agents in the chat group
+    const { chatGroupsAgents } = await import('../schemas');
+    const groupAgents = await this.db
+      .select({ agentId: chatGroupsAgents.agentId })
+      .from(chatGroupsAgents)
+      .where(eq(chatGroupsAgents.chatGroupId, chatGroupId));
+
+    if (groupAgents.length === 0) {
+      return;
+    }
+
+    // 2. For each agent, copy all its plugins
+    for (const { agentId } of groupAgents) {
+      await copyPluginsFromAgent(this.db, agentId, targetUserIds);
+    }
+  }
+
   // ******* Query Methods ******* //
 
   /**
@@ -319,11 +417,15 @@ export class ChatGroupSharingModel {
 
   /**
    * Share a chat group with specific users (admin only)
+   * Also copies all plugins (both regular and custom) from all agents in the group to target users
    */
   async shareChatGroup(
     chatGroupId: string,
     targetUserIds: string[],
   ): Promise<ChatGroupShareItem[]> {
+    // Copy plugins from all agents in the group before creating share records
+    await this.copyPluginsFromChatGroup(chatGroupId, targetUserIds);
+
     const shares: NewChatGroupShare[] = targetUserIds.map((targetUserId) => ({
       chatGroupId,
       isGlobal: false,
@@ -336,8 +438,20 @@ export class ChatGroupSharingModel {
 
   /**
    * Share a chat group globally with all users (admin only)
+   * Also copies all plugins (both regular and custom) from all agents in the group to all existing users
    */
   async shareGlobalChatGroup(chatGroupId: string): Promise<ChatGroupShareItem> {
+    // Get all users to copy plugins to
+    const { users } = await import('../schemas');
+    const allUsers = await this.db.select({ id: users.id }).from(users);
+
+    const allUserIds = allUsers.map((u) => u.id).filter((id) => id !== this.userId);
+
+    // Copy plugins from all agents in the group to all users
+    if (allUserIds.length > 0) {
+      await this.copyPluginsFromChatGroup(chatGroupId, allUserIds);
+    }
+
     const [share] = await this.db
       .insert(chatGroupShares)
       .values({

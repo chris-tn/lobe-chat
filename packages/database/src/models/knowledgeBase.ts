@@ -54,7 +54,7 @@ export class KnowledgeBaseModel {
   // query
   query = async () => {
     // Get accessible knowledge base IDs (owned + shared)
-    const {KnowledgeBaseSharingModel} = await import('./knowledgeBaseSharing');
+    const { KnowledgeBaseSharingModel } = await import('./knowledgeBaseSharing');
     const sharingModel = new KnowledgeBaseSharingModel(this.db, this.userId);
     const sharedKbIds = await sharingModel.getAccessibleKnowledgeBaseIds();
 
