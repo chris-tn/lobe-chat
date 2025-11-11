@@ -19,6 +19,8 @@ const Layout = ({ children, topic, conversation, portal }: LayoutProps) => {
         style={{ overflow: 'hidden', position: 'relative' }}
         width={'100%'}
       >
+        <TopicPanel>{topic}</TopicPanel>
+        {children}
         <Flexbox
           height={'100%'}
           style={{ overflow: 'hidden', position: 'relative' }}
@@ -26,11 +28,9 @@ const Layout = ({ children, topic, conversation, portal }: LayoutProps) => {
         >
           {conversation}
         </Flexbox>
-        {children}
         <Portal>
           <Suspense fallback={<BrandTextLoading />}>{portal}</Suspense>
         </Portal>
-        <TopicPanel>{topic}</TopicPanel>
       </Flexbox>
       <MainInterfaceTracker />
     </>
