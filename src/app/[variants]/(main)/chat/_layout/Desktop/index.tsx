@@ -19,8 +19,8 @@ const Layout = ({ children, session }: LayoutProps) => {
         style={{ maxWidth: '100%', overflow: 'hidden', position: 'relative' }}
         width={'100%'}
       >
-        <SessionPanel>{session}</SessionPanel>
         <Workspace>{children}</Workspace>
+        <SessionPanel>{session}</SessionPanel>
       </Flexbox>
       {!isDesktop && <InitClientDB bottom={60} />}
       {/* ↓ cloud slot ↓ */}
