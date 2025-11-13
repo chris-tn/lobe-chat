@@ -14,8 +14,8 @@ const Header = () => {
   return (
     showHeader && (
       <ChatHeader
-        left={<Main />}
-        right={<HeaderAction />}
+        left={<HeaderAction />}
+        right={<Main />}
         style={{
           height: 40,
           maxHeight: 40,

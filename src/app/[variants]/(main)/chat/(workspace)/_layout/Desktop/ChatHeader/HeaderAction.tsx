@@ -20,7 +20,6 @@ import { settingsSelectors } from '@/store/user/selectors';
 import { HotkeyEnum } from '@/types/hotkey';
 
 import SettingButton from '../../../features/SettingButton';
-import ShareButton from '../../../features/ShareButton';
 
 const HeaderAction = memo<{ className?: string }>(({ className }) => {
   const { t } = useTranslation('chat');
@@ -45,7 +44,7 @@ const HeaderAction = memo<{ className?: string }>(({ className }) => {
           placement: 'bottom',
         }}
       />
-      <ShareButton />
+      {/* <ShareButton /> */}
       <ActionIcon
         icon={showAgentSettings ? PanelRightClose : PanelRightOpen}
         onClick={() => toggleConfig()}

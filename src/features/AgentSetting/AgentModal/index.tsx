@@ -310,7 +310,7 @@ const AgentModal = memo(() => {
       {
         children: (
           <Select
-            defaultValue="medium"
+            defaultValue="minimal"
             options={[
               { label: t('settingModel.reasoningEffort.options.low'), value: 'low' },
               { label: t('settingModel.reasoningEffort.options.medium'), value: 'medium' },

@@ -11,7 +11,7 @@ const GPT5ReasoningEffortSlider = memo(() => {
     s.updateAgentChatConfig,
   ]);
 
-  const gpt5ReasoningEffort = config.gpt5ReasoningEffort || 'medium'; // Default to 'medium' if not set
+  const gpt5ReasoningEffort = config.gpt5ReasoningEffort || 'minimal'; // Default to 'minimal' if not set
 
   const marks = {
     0: 'minimal',
