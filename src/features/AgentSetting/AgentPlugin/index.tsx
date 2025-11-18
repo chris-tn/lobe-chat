@@ -3,7 +3,7 @@
 import { Avatar, Button, Form, type FormGroupItemType, Tag, Tooltip } from '@lobehub/ui';
 import { Empty, Space, Switch } from 'antd';
 import isEqual from 'fast-deep-equal';
-import { LucideTrash2, Store } from 'lucide-react';
+import { LucideTrash2 } from 'lucide-react';
 import Link from 'next/link';
 import { memo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
@@ -14,6 +14,7 @@ import PluginTag from '@/components/Plugins/PluginTag';
 import { FORM_STYLE } from '@/const/layoutTokens';
 import PluginStore from '@/features/PluginStore';
 import { useFetchInstalledPlugins } from '@/hooks/useFetchInstalledPlugins';
+import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { featureFlagsSelectors, useServerConfigStore } from '@/store/serverConfig';
 import { pluginHelpers, useToolStore } from '@/store/tool';
 import { toolSelectors } from '@/store/tool/selectors';
@@ -26,6 +27,7 @@ import PluginAction from './PluginAction';
 
 const AgentPlugin = memo(() => {
   const { t } = useTranslation('setting');
+  const isAdmin = useIsAdmin();
 
   const [showStore, setShowStore] = useState(false);
 
@@ -49,7 +51,7 @@ const AgentPlugin = memo(() => {
     return {
       avatar: <PluginAvatar avatar={pluginHelpers.getPluginAvatar(meta)} size={40} />,
       children: isCustomPlugin ? (
-        <LocalPluginItem id={identifier} />
+        <LocalPluginItem disabled={!isAdmin} id={identifier} />
       ) : (
         <PluginAction identifier={identifier} />
       ),
@@ -112,7 +114,7 @@ const AgentPlugin = memo(() => {
           />
         </Tooltip>
       ) : null}
-      <Tooltip title={t('plugin.store')}>
+      {/* <Tooltip title={t('plugin.store')}>
         <Button
           icon={Store}
           onClick={(e) => {
@@ -121,7 +123,7 @@ const AgentPlugin = memo(() => {
           }}
           size={'small'}
         />
-      </Tooltip>
+      </Tooltip> */}
     </Space.Compact>
   );
 

@@ -88,16 +88,39 @@ export class FileModel {
   delete = async (id: string, removeGlobalFile: boolean = true, trx?: Transaction) => {
     const executeInTransaction = async (tx: Transaction) => {
       // pglite 环境下不能再 transaction 中使用非事务操作，会阻塞住
-      const file = await this.findById(id, tx);
+      const file = await this.findById(id, tx, true); // Use skipUserCheck to allow shared KB access
       if (!file) return;
+
+      // Check if user owns the file or has access via shared KB
+      const isOwner = file.userId === this.userId;
+      let hasSharedAccess = false;
+
+      if (!isOwner) {
+        // Check if file belongs to a shared KB
+        const kbFile = await tx.query.knowledgeBaseFiles.findFirst({
+          where: eq(knowledgeBaseFiles.fileId, id),
+        });
+
+        if (kbFile) {
+          const { KnowledgeBaseSharingModel } = await import('./knowledgeBaseSharing');
+          const sharingModel = new KnowledgeBaseSharingModel(this.db, this.userId);
+          const accessibleKBIds = await sharingModel.getAccessibleKnowledgeBaseIds();
+
+          hasSharedAccess = accessibleKBIds.includes(kbFile.knowledgeBaseId);
+        }
+      }
+
+      if (!isOwner && !hasSharedAccess) {
+        return; // User doesn't have permission to delete this file
+      }
 
       const fileHash = file.fileHash!;
 
       // 2. Delete related chunks
       await this.deleteFileChunks(tx as any, [id]);
 
-      // 3. Delete file record
-      await tx.delete(files).where(and(eq(files.id, id), eq(files.userId, this.userId)));
+      // 3. Delete file record (allow deletion if owner or has shared access)
+      await tx.delete(files).where(eq(files.id, id));
 
       const result = await tx
         .select({ count: count() })
@@ -137,24 +160,53 @@ export class FileModel {
     if (ids.length === 0) return [];
 
     return await this.db.transaction(async (trx) => {
-      // 1. 先获取文件列表，以便返回删除的文件
-      const fileList = await trx.query.files.findMany({
-        where: and(inArray(files.id, ids), eq(files.userId, this.userId)),
+      // 1. Get files that user owns or has access to via shared KBs
+      const { KnowledgeBaseSharingModel } = await import('./knowledgeBaseSharing');
+      const sharingModel = new KnowledgeBaseSharingModel(this.db, this.userId);
+      const accessibleKBIds = await sharingModel.getAccessibleKnowledgeBaseIds();
+
+      // Get all files with the given IDs
+      const allFiles = await trx.query.files.findMany({
+        where: inArray(files.id, ids),
       });
 
-      if (fileList.length === 0) return [];
+      // Wait for all async checks to complete
+      const fileResults = await Promise.all(
+        allFiles.map(async (file) => {
+          const isOwner = file.userId === this.userId;
+          if (isOwner) return file;
+
+          const kbFile = await trx.query.knowledgeBaseFiles.findFirst({
+            where: eq(knowledgeBaseFiles.fileId, file.id),
+          });
+
+          if (kbFile && accessibleKBIds.includes(kbFile.knowledgeBaseId)) {
+            return file;
+          }
+
+          return null;
+        }),
+      );
+      const deletableFiles = fileResults.filter(
+        (file): file is NonNullable<typeof file> => file !== null,
+      );
+
+      if (deletableFiles.length === 0) return [];
+
+      // Extract file IDs that can be deleted
+      const deletableFileIds = deletableFiles.map((file) => file.id);
 
       // 提取需要检查的文件哈希值
-      const hashList = fileList.map((file) => file.fileHash!).filter(Boolean);
+      const hashList = deletableFiles.map((file) => file.fileHash!).filter(Boolean);
 
       // 2. 删除相关的 chunks
-      await this.deleteFileChunks(trx as any, ids);
+      await this.deleteFileChunks(trx as any, deletableFileIds);
 
-      // 3. 删除文件记录
-      await trx.delete(files).where(and(inArray(files.id, ids), eq(files.userId, this.userId)));
+      // 3. 删除文件记录 (allow deletion if owner or has shared access)
+      await trx.delete(files).where(inArray(files.id, deletableFileIds));
 
       // 如果不需要删除全局文件，直接返回
-      if (!removeGlobalFile || hashList.length === 0) return fileList;
+      if (!removeGlobalFile || hashList.length === 0) return deletableFiles;
 
       // 4. 找出不再被引用的哈希值
       const remainingFiles = await trx
@@ -170,13 +222,13 @@ export class FileModel {
       // 找出需要删除的哈希值(不再被任何文件使用的)
       const hashesToDelete = hashList.filter((hash) => !usedHashes.has(hash));
 
-      if (hashesToDelete.length === 0) return fileList;
+      if (hashesToDelete.length === 0) return deletableFiles;
 
       // 5. 删除不再被引用的全局文件
       await trx.delete(globalFiles).where(inArray(globalFiles.hashId, hashesToDelete));
 
       // 返回删除的文件列表
-      return fileList;
+      return deletableFiles;
     });
   };
 

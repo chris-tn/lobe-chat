@@ -9,7 +9,10 @@ import { Center, Flexbox } from 'react-layout-kit';
 import BubblesLoading from '@/components/BubblesLoading';
 import RepoIcon from '@/components/RepoIcon';
 import { LOADING_FLAT } from '@/const/message';
+import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { useKnowledgeBaseStore } from '@/store/knowledgeBase';
+import { useUserStore } from '@/store/user';
+import { userProfileSelectors } from '@/store/user/slices/auth/selectors';
 
 export const knowledgeItemClass = 'knowledge-base-item';
 
@@ -39,6 +42,10 @@ interface KnowledgeBaseItemProps {
 
 const Content = memo<KnowledgeBaseItemProps>(({ id, name, showMore }) => {
   const { t } = useTranslation(['file', 'common']);
+  const isAdmin = useIsAdmin();
+  const currentUserId = useUserStore(userProfileSelectors.userId);
+  const { useFetchKnowledgeBaseItem } = useKnowledgeBaseStore();
+  const { data: knowledgeBaseItem } = useFetchKnowledgeBaseItem(id);
 
   const [editing, updateKnowledgeBase, removeKnowledgeBase, isLoading] = useKnowledgeBaseStore(
     (s) => [
@@ -48,6 +55,11 @@ const Content = memo<KnowledgeBaseItemProps>(({ id, name, showMore }) => {
       s.knowledgeBaseLoadingIds.includes(id),
     ],
   );
+
+  // Check if user is the owner of the knowledge base
+  // Only owners can delete (backend enforces this, but we hide the option for shared KBs)
+  const isOwner =
+    isAdmin || (knowledgeBaseItem && (knowledgeBaseItem as any).userId === currentUserId);
 
   const { styles } = useStyles();
 
@@ -61,8 +73,8 @@ const Content = memo<KnowledgeBaseItemProps>(({ id, name, showMore }) => {
 
   const { modal } = App.useApp();
 
-  const items = useMemo<MenuProps['items']>(
-    () => [
+  const items = useMemo<MenuProps['items']>(() => {
+    const menuItems: MenuProps['items'] = [
       {
         icon: <Icon icon={PencilLine} />,
         key: 'rename',
@@ -72,31 +84,38 @@ const Content = memo<KnowledgeBaseItemProps>(({ id, name, showMore }) => {
           toggleEditing(true);
         },
       },
-      {
-        type: 'divider' as const,
-      },
-      {
-        danger: true,
-        icon: <Icon icon={Trash} />,
-        key: 'delete',
-        label: t('delete', { ns: 'common' }),
-        onClick: ({ domEvent }: any) => {
-          if (!id) return;
+    ];
 
-          domEvent.stopPropagation();
-          modal.confirm({
-            centered: true,
-            okButtonProps: { danger: true },
-            onOk: async () => {
-              await removeKnowledgeBase(id);
-            },
-            title: t('knowledgeBase.list.confirmRemoveKnowledgeBase'),
-          });
+    // Only show delete option if user is the owner
+    if (isOwner) {
+      menuItems.push(
+        {
+          type: 'divider' as const,
         },
-      },
-    ],
-    [t, id, modal, removeKnowledgeBase],
-  );
+        {
+          danger: true,
+          icon: <Icon icon={Trash} />,
+          key: 'delete',
+          label: t('delete', { ns: 'common' }),
+          onClick: ({ domEvent }: any) => {
+            if (!id) return;
+
+            domEvent.stopPropagation();
+            modal.confirm({
+              centered: true,
+              okButtonProps: { danger: true },
+              onOk: async () => {
+                await removeKnowledgeBase(id);
+              },
+              title: t('knowledgeBase.list.confirmRemoveKnowledgeBase'),
+            });
+          },
+        },
+      );
+    }
+
+    return menuItems;
+  }, [t, id, modal, removeKnowledgeBase, isOwner]);
 
   return (
     <Flexbox

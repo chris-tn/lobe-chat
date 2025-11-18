@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 
 import { HEADER_ICON_SIZE } from '@/const/layoutTokens';
 import { isServerMode } from '@/const/version';
+import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { configService } from '@/services/config';
 import { useServerConfigStore } from '@/store/serverConfig';
 import { useSessionStore } from '@/store/session';
@@ -14,6 +15,7 @@ import SubmitAgentButton from './SubmitAgentButton';
 export const HeaderContent = memo<{ mobile?: boolean; modal?: boolean }>(({ modal }) => {
   const { t } = useTranslation('setting');
   const id = useSessionStore((s) => s.activeId);
+  const isAdmin = useIsAdmin();
 
   const mobile = useServerConfigStore((s) => s.isMobile);
 
@@ -46,7 +48,7 @@ export const HeaderContent = memo<{ mobile?: boolean; modal?: boolean }>(({ moda
 
   return (
     <>
-      <SubmitAgentButton modal={modal} />
+      {isAdmin && <SubmitAgentButton modal={modal} />}
       {!isServerMode && (
         <Dropdown arrow={false} menu={{ items }} trigger={['click']}>
           {modal ? (

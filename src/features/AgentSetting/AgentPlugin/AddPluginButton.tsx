@@ -5,10 +5,12 @@ import { useTranslation } from 'react-i18next';
 
 import { useStore } from '@/features/AgentSetting/store';
 import DevModal from '@/features/PluginDevModal';
+import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { useToolStore } from '@/store/tool';
 
 const AddPluginButton = forwardRef<HTMLButtonElement>((props, ref) => {
   const { t } = useTranslation('setting');
+  const isAdmin = useIsAdmin();
   const [showModal, setModal] = useState(false);
   const [toggleAgentPlugin] = useStore((s) => [s.toggleAgentPlugin]);
   const [installCustomPlugin, updateNewDevPlugin] = useToolStore((s) => [
@@ -32,12 +34,15 @@ const AddPluginButton = forwardRef<HTMLButtonElement>((props, ref) => {
         open={showModal}
       />
       <Button
+        disabled={!isAdmin}
         icon={PackagePlus}
         onClick={() => {
+          if (!isAdmin) return;
           setModal(true);
         }}
         ref={ref}
         size={'small'}
+        title={!isAdmin ? t('onlyAdminCanCreate', { ns: 'chat' }) : undefined}
       >
         {t('plugin.addTooltip')}
       </Button>

@@ -34,9 +34,12 @@ export const fileRouter = router({
   createFile: fileProcedure
     .input(UploadFileSchema.omit({ url: true }).extend({ url: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      // If uploading to a KB, check if user owns it (prevent upload to shared KBs)
+      // If uploading to a KB, check if user owns it or has shared access
       if (input.knowledgeBaseId) {
         const { KnowledgeBaseModel } = await import('@/database/models/knowledgeBase');
+        const { KnowledgeBaseSharingModel } = await import(
+          '@/database/models/knowledgeBaseSharing'
+        );
         const kbModel = new KnowledgeBaseModel(ctx.serverDB, ctx.userId);
         const kb = await kbModel.findById(input.knowledgeBaseId);
 
@@ -47,12 +50,20 @@ export const fileRouter = router({
           });
         }
 
-        // Only KB owner can upload files
-        if (kb.userId !== ctx.userId) {
-          throw new TRPCError({
-            code: 'FORBIDDEN',
-            message: 'Only the knowledge base owner can upload files',
-          });
+        // Check if user is KB owner
+        const isOwner = kb.userId === ctx.userId;
+
+        // If not owner, check if KB is shared with user
+        if (!isOwner) {
+          const sharingModel = new KnowledgeBaseSharingModel(ctx.serverDB, ctx.userId);
+          const hasAccess = await sharingModel.isKnowledgeBaseShared(input.knowledgeBaseId);
+
+          if (!hasAccess) {
+            throw new TRPCError({
+              code: 'FORBIDDEN',
+              message: 'You do not have permission to upload files to this knowledge base',
+            });
+          }
         }
       }
 
