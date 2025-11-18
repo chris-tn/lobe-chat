@@ -10,6 +10,7 @@ import { WebBrowsingManifest } from './web-browsing';
 
 export const builtinTools: LobeBuiltinTool[] = [
   {
+    hidden: true,
     identifier: ArtifactsManifest.identifier,
     manifest: ArtifactsManifest,
     type: 'builtin',
@@ -32,6 +33,7 @@ export const builtinTools: LobeBuiltinTool[] = [
     type: 'builtin',
   },
   {
+    hidden: true,
     identifier: CodeInterpreterManifest.identifier,
     manifest: CodeInterpreterManifest,
     type: 'builtin',
