@@ -301,6 +301,13 @@
       "when": 1762244076679,
       "tag": "0042_productive_monster_badoon",
       "breakpoints": true
+    },
+    {
+      "idx": 43,
+      "version": "7",
+      "when": 1763713084000,
+      "tag": "0044_add_integrations",
+      "breakpoints": true
     }
   ],
   "version": "6"

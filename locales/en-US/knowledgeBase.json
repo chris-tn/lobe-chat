@@ -22,6 +22,125 @@
     },
     "title": "Create Knowledge Base"
   },
+  "integration": {
+    "title": "Integrations",
+    "create": {
+      "title": "Create Integration",
+      "create": "Create",
+      "creating": "Creating...",
+      "name": {
+        "label": "Integration Name",
+        "placeholder": "My Nextcloud Sync",
+        "required": "Please enter integration name"
+      },
+      "description": {
+        "label": "Description",
+        "placeholder": "Optional description"
+      },
+      "knowledgeBase": {
+        "label": "Target Knowledge Base",
+        "placeholder": "Select knowledge base",
+        "required": "Please select knowledge base"
+      },
+      "nextcloud": {
+        "title": "Nextcloud Integration",
+        "description": "Sync files from Nextcloud shared folder to knowledge base",
+        "url": {
+          "label": "Nextcloud URL",
+          "placeholder": "https://nextcloud.example.com",
+          "required": "Please enter Nextcloud URL"
+        },
+        "username": {
+          "label": "Username",
+          "placeholder": "your-username",
+          "required": "Please enter username"
+        },
+        "password": {
+          "label": "Password",
+          "placeholder": "your-password",
+          "required": "Please enter password"
+        },
+        "folderPath": {
+          "label": "Folder Path",
+          "placeholder": "/shared-folder",
+          "required": "Please enter folder path"
+        }
+      },
+      "syncSettings": {
+        "title": "Sync Settings",
+        "enabled": {
+          "label": "Enable Auto Sync"
+        },
+        "interval": {
+          "label": "Sync Interval (seconds)",
+          "placeholder": "3600",
+          "help": "Default 1 hour (3600 seconds)"
+        }
+      },
+      "testConnection": "Test Connection"
+    },
+    "list": {
+      "title": "Integration List",
+      "empty": "No integrations yet",
+      "actions": {
+        "sync": "Sync Now",
+        "edit": "Edit",
+        "delete": "Delete",
+        "test": "Test Connection"
+      },
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive",
+        "error": "Error"
+      },
+      "syncStatus": {
+        "pending": "Pending",
+        "running": "Running",
+        "completed": "Completed",
+        "failed": "Failed"
+      }
+    },
+    "sync": {
+      "title": "Sync Status",
+      "button": "Sync Now",
+      "syncing": "Syncing...",
+      "success": "Sync completed",
+      "lastSync": "Last Sync",
+      "nextSync": "Next Sync",
+      "status": "Status",
+      "filesAdded": "Files Added",
+      "filesUpdated": "Files Updated",
+      "filesDeleted": "Files Deleted",
+      "filesSkipped": "Files Skipped",
+      "errors": "Errors",
+      "logs": "Logs",
+      "noLogs": "No logs yet",
+      "trigger": "Trigger Sync"
+    },
+    "delete": {
+      "title": "Delete Integration",
+      "confirm": "Are you sure you want to delete this integration?",
+      "description": "Deleting the integration will not delete synced files, but will stop automatic syncing.",
+      "confirmButton": "Delete",
+      "cancelButton": "Cancel",
+      "success": "Integration deleted successfully"
+    },
+    "detail": {
+      "basicInfo": "Basic Information",
+      "name": "Name",
+      "description": "Description",
+      "type": "Type",
+      "status": "Status",
+      "knowledgeBase": "Knowledge Base",
+      "syncEnabled": "Auto Sync",
+      "syncInterval": "Sync Interval",
+      "enabled": "Enabled",
+      "disabled": "Disabled",
+      "lastSyncMessage": "Last Sync Message",
+      "nextcloudConfig": "Nextcloud Configuration",
+      "selectIntegration": "Select an integration to view details"
+    }
+  },
   "tab": {
     "evals": "Evaluations",
     "files": "Documents",

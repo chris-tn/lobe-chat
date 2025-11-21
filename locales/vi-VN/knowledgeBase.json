@@ -22,6 +22,125 @@
     },
     "title": "Tạo kho kiến thức mới"
   },
+  "integration": {
+    "title": "Tích hợp",
+    "create": {
+      "title": "Tạo tích hợp",
+      "create": "Tạo",
+      "creating": "Đang tạo...",
+      "name": {
+        "label": "Tên tích hợp",
+        "placeholder": "Đồng bộ Nextcloud của tôi",
+        "required": "Vui lòng nhập tên tích hợp"
+      },
+      "description": {
+        "label": "Mô tả",
+        "placeholder": "Mô tả tùy chọn"
+      },
+      "knowledgeBase": {
+        "label": "Kho kiến thức mục tiêu",
+        "placeholder": "Chọn kho kiến thức",
+        "required": "Vui lòng chọn kho kiến thức"
+      },
+      "nextcloud": {
+        "title": "Tích hợp Nextcloud",
+        "description": "Đồng bộ tệp từ thư mục chia sẻ Nextcloud vào kho kiến thức",
+        "url": {
+          "label": "URL Nextcloud",
+          "placeholder": "https://nextcloud.example.com",
+          "required": "Vui lòng nhập URL Nextcloud"
+        },
+        "username": {
+          "label": "Tên người dùng",
+          "placeholder": "tên-người-dùng",
+          "required": "Vui lòng nhập tên người dùng"
+        },
+        "password": {
+          "label": "Mật khẩu",
+          "placeholder": "mật-khẩu",
+          "required": "Vui lòng nhập mật khẩu"
+        },
+        "folderPath": {
+          "label": "Đường dẫn thư mục",
+          "placeholder": "/thư-mục-chia-sẻ",
+          "required": "Vui lòng nhập đường dẫn thư mục"
+        }
+      },
+      "syncSettings": {
+        "title": "Cài đặt đồng bộ",
+        "enabled": {
+          "label": "Bật đồng bộ tự động"
+        },
+        "interval": {
+          "label": "Khoảng thời gian đồng bộ (giây)",
+          "placeholder": "3600",
+          "help": "Mặc định 1 giờ (3600 giây)"
+        }
+      },
+      "testConnection": "Kiểm tra kết nối"
+    },
+    "list": {
+      "title": "Danh sách tích hợp",
+      "empty": "Chưa có tích hợp nào",
+      "actions": {
+        "sync": "Đồng bộ ngay",
+        "edit": "Chỉnh sửa",
+        "delete": "Xóa",
+        "test": "Kiểm tra kết nối"
+      },
+      "status": {
+        "active": "Hoạt động",
+        "inactive": "Không hoạt động",
+        "error": "Lỗi"
+      },
+      "syncStatus": {
+        "pending": "Đang chờ",
+        "running": "Đang chạy",
+        "completed": "Hoàn thành",
+        "failed": "Thất bại"
+      }
+    },
+    "sync": {
+      "title": "Trạng thái đồng bộ",
+      "button": "Đồng bộ ngay",
+      "syncing": "Đang đồng bộ...",
+      "success": "Đồng bộ hoàn tất",
+      "lastSync": "Lần đồng bộ cuối",
+      "nextSync": "Lần đồng bộ tiếp theo",
+      "status": "Trạng thái",
+      "filesAdded": "Tệp đã thêm",
+      "filesUpdated": "Tệp đã cập nhật",
+      "filesDeleted": "Tệp đã xóa",
+      "filesSkipped": "Tệp đã bỏ qua",
+      "errors": "Lỗi",
+      "logs": "Nhật ký",
+      "noLogs": "Chưa có nhật ký",
+      "trigger": "Kích hoạt đồng bộ"
+    },
+    "delete": {
+      "title": "Xóa tích hợp",
+      "confirm": "Bạn có chắc chắn muốn xóa tích hợp này không?",
+      "description": "Xóa tích hợp sẽ không xóa các tệp đã đồng bộ, nhưng sẽ dừng đồng bộ tự động.",
+      "confirmButton": "Xóa",
+      "cancelButton": "Hủy",
+      "success": "Xóa tích hợp thành công"
+    },
+    "detail": {
+      "basicInfo": "Thông tin cơ bản",
+      "name": "Tên",
+      "description": "Mô tả",
+      "type": "Loại",
+      "status": "Trạng thái",
+      "knowledgeBase": "Kho kiến thức",
+      "syncEnabled": "Đồng bộ tự động",
+      "syncInterval": "Khoảng thời gian đồng bộ",
+      "enabled": "Đã bật",
+      "disabled": "Đã tắt",
+      "lastSyncMessage": "Thông báo đồng bộ cuối",
+      "nextcloudConfig": "Cấu hình Nextcloud",
+      "selectIntegration": "Chọn một tích hợp để xem chi tiết"
+    }
+  },
   "tab": {
     "evals": "Đánh giá",
     "files": "Tài liệu",

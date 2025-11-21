@@ -4,6 +4,7 @@ import { App } from 'antd';
 import { memo, useEffect } from 'react';
 import { MemoryRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 
+import IntegrationsPage from './routes/Integrations';
 import KnowledgeBaseDetailPage from './routes/KnowledgeBaseDetail';
 import KnowledgeBasesListPage from './routes/KnowledgeBasesList';
 import KnowledgeHomePage from './routes/KnowledgeHome';
@@ -59,6 +60,9 @@ const KnowledgeRouter = memo(() => {
           {/* Knowledge bases routes */}
           <Route element={<KnowledgeBasesListPage />} path="/bases" />
           <Route element={<KnowledgeBaseDetailPage />} path="/bases/:id" />
+
+          {/* Integrations route */}
+          <Route element={<IntegrationsPage />} path="/integrations" />
 
           {/* Fallback */}
           <Route element={<Navigate replace to="/" />} path="*" />

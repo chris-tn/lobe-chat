@@ -19,6 +19,7 @@ import { useSetFileModalId } from '../../shared/useFileQueryParam';
 import Container from './layout/Container';
 import RegisterHotkeys from './layout/RegisterHotkeys';
 import FileMenu from './menu/FileMenu';
+import Integrations from './menu/Integrations';
 import KnowledgeBase from './menu/KnowledgeBase';
 
 const useStyles = createStyles(({ css, token }) => ({
@@ -40,6 +41,7 @@ const MenuContent = memo(() => {
         <FileMenu />
       </Flexbox>
       <KnowledgeBase />
+      <Integrations />
     </Flexbox>
   );
 });

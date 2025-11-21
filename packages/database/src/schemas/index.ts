@@ -7,6 +7,7 @@ export * from './chatGroup';
 export * from './document';
 export * from './file';
 export * from './generation';
+export * from './integration';
 export * from './knowledgeBaseSharing';
 export * from './message';
 export * from './nextauth';
