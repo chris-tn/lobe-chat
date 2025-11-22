@@ -10,7 +10,9 @@ import { FileModel } from '@/database/models/file';
 import { IntegrationModel } from '@/database/models/integration';
 import { KnowledgeBaseModel } from '@/database/models/knowledgeBase';
 import { fileEnv } from '@/envs/file';
+import { ChunkService } from '@/server/services/chunk';
 import { TempFileManager } from '@/server/utils/tempFileManager';
+import { isChunkingUnsupported } from '@/utils/isChunkingUnsupported';
 import { nanoid } from '@/utils/uuid';
 
 import { DocumentService } from '../document';
@@ -20,7 +22,7 @@ import { NextcloudService } from './nextcloud';
 const log = debug('lobe-chat:service:integration:sync');
 
 interface SyncResult {
-  errors: Array<{ error: string, file: string; }>;
+  errors: Array<{ error: string; file: string }>;
   filesAdded: number;
   filesDeleted: number;
   filesSkipped: number;
@@ -35,6 +37,7 @@ export class IntegrationSyncService {
   private fileService: FileService;
   private documentService: DocumentService;
   private knowledgeBaseModel: KnowledgeBaseModel;
+  private chunkService: ChunkService;
 
   constructor(db: LobeChatDatabase, userId: string) {
     this.db = db;
@@ -44,6 +47,7 @@ export class IntegrationSyncService {
     this.fileService = new FileService(db, userId);
     this.documentService = new DocumentService(db, userId);
     this.knowledgeBaseModel = new KnowledgeBaseModel(db, userId);
+    this.chunkService = new ChunkService(db, userId);
   }
 
   /**
@@ -233,6 +237,24 @@ export class IntegrationSyncService {
             totalCharCount: fileDocument.totalCharCount,
             totalLineCount: fileDocument.totalLineCount,
           });
+
+          // 6. Trigger chunking and embedding for the file (only if file type is supported)
+          if (!isChunkingUnsupported(documentFileType)) {
+            // Create a simple JWT payload with just userId for server-side operations
+            const jwtPayload = { userId: this.userId };
+            try {
+              log('Triggering chunking for file: %s (type: %s)', fileId, documentFileType);
+              await this.chunkService.asyncParseFileToChunks(fileId, jwtPayload, false);
+              log('Chunking task created for file: %s', fileId);
+              // Note: Embedding will be automatically triggered after chunking completes
+              // if CHUNKS_AUTO_EMBEDDING is enabled (see src/server/routers/async/file.ts:246)
+            } catch (error) {
+              log('Error triggering chunking for file %s: %O', fileId, error);
+              // Don't throw, continue with other files
+            }
+          } else {
+            log('Skipping chunking for file %s (unsupported type: %s)', fileId, documentFileType);
+          }
         } finally {
           tempManager.cleanup();
         }
@@ -283,7 +305,7 @@ export class IntegrationSyncService {
       filesUpdated: 0,
     };
 
-    const logs: Array<{ level: string; message: string, timestamp: string; }> = [];
+    const logs: Array<{ level: string; message: string; timestamp: string }> = [];
 
     const addLog = (level: string, message: string) => {
       logs.push({
@@ -313,16 +335,16 @@ export class IntegrationSyncService {
 
           // Check if file needs update
           let needsUpdate = false;
-          if (existingMapping && // Compare metadata
-            (
-              existingMapping.remoteSize !== remoteFile.size ||
+          if (
+            existingMapping && // Compare metadata
+            (existingMapping.remoteSize !== remoteFile.size ||
               existingMapping.remoteETag !== remoteFile.etag ||
               (existingMapping.remoteModifiedAt &&
                 new Date(existingMapping.remoteModifiedAt).getTime() <
-                  new Date(remoteFile.lastmod).getTime())
-            )) {
-              needsUpdate = true;
-            }
+                  new Date(remoteFile.lastmod).getTime()))
+          ) {
+            needsUpdate = true;
+          }
 
           if (existingMapping && !needsUpdate) {
             result.filesSkipped++;
