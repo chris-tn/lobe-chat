@@ -1,20 +1,16 @@
-import {
-  AGENT_RUNTIME_ERROR_SET,
-  ChatCompletionErrorPayload,
-} from '@lobechat/model-runtime';
+import { AGENT_RUNTIME_ERROR_SET, ChatCompletionErrorPayload } from '@lobechat/model-runtime';
 import { ChatErrorType, UIChatMessage } from '@lobechat/types';
 import debug from 'debug';
 import { and, eq } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
 
-import { LOBE_CHAT_OIDC_AUTH_HEADER } from '@/const/auth';
 import { LOADING_FLAT } from '@/const/message';
 import { AgentModel } from '@/database/models/agent';
 import { MessageModel } from '@/database/models/message';
 import { SessionModel } from '@/database/models/session';
+import { UserModel } from '@/database/models/user';
 import { sessions } from '@/database/schemas';
 import { getServerDB } from '@/database/server';
-import { validateOIDCJWT } from '@/libs/oidc-provider/jwt';
 import { initModelRuntimeWithUserPayload } from '@/server/modules/ModelRuntime';
 import { ChatStreamPayload } from '@/types/openai/chat';
 import { createErrorResponse } from '@/utils/errorResponse';
@@ -25,11 +21,41 @@ const log = debug('flowise-api:prediction');
 
 export const maxDuration = 300;
 
+/**
+ * CORS headers for cross-origin requests
+ */
+const corsHeaders = {
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Max-Age': '86400',
+};
+
+/**
+ * Helper to create JSON response with CORS headers
+ */
+const jsonResponse = (data: any, status: number = 200) => {
+  return NextResponse.json(data, {
+    headers: corsHeaders,
+    status,
+  });
+};
+
+/**
+ * Handle CORS preflight requests
+ */
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    headers: corsHeaders,
+    status: 204,
+  });
+}
+
 interface PredictionRequestBody {
   chatId?: string;
   overrideConfig?: {
     // JWT token from SSO
-    [key: string]: any; 
+    [key: string]: any;
     aUser?: string;
   };
   question: string;
@@ -78,6 +104,7 @@ function convertToOpenAIMessages(messages: UIChatMessage[]): Array<{
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ agentId: string }> }) {
   const { agentId } = await params;
+  console.log('POST /api/v1/prediction/%s - Request received', agentId);
 
   try {
     // ============ 1. Parse request body ============ //
@@ -85,60 +112,52 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ age
     const { question, chatId, overrideConfig, streaming = true } = body;
 
     if (!question) {
-      return NextResponse.json({ error: 'question is required' }, { status: 400 });
+      return jsonResponse({ error: 'question is required' }, 400);
     }
 
-    // ============ 2. Authentication - Priority: body > header ============ //
+    // ============ 2. Authentication - Get user from email ============ //
     let userId: string;
     let jwtPayload: any = {};
 
-    // Try to get JWT from overrideConfig.aUser first (for embedded UI)
-    const jwtFromBody = overrideConfig?.aUser;
-    const jwtFromHeader = req.headers.get(LOBE_CHAT_OIDC_AUTH_HEADER);
+    // Get email from overrideConfig.aUser
+    const emailFromBody = overrideConfig?.aUser;
 
-    if (jwtFromBody) {
-      try {
-        const oidc = await validateOIDCJWT(jwtFromBody);
-        userId = oidc.userId;
-        jwtPayload = { ...jwtPayload, userId };
-        log('Authenticated via JWT from body, userId: %s', userId);
-      } catch (error) {
-        log('JWT from body validation failed: %O', error);
-        return NextResponse.json(
-          { error: 'Invalid JWT token in overrideConfig.aUser' },
-          { status: 401 },
-        );
-      }
-    } else if (jwtFromHeader) {
-      try {
-        const oidc = await validateOIDCJWT(jwtFromHeader);
-        userId = oidc.userId;
-        jwtPayload = { ...jwtPayload, userId };
-        log('Authenticated via JWT from header, userId: %s', userId);
-      } catch (error) {
-        log('JWT from header validation failed: %O', error);
-        return NextResponse.json({ error: 'Invalid JWT token in header' }, { status: 401 });
-      }
-    } else {
-      return NextResponse.json(
-        {
-          error: 'Authentication required: provide JWT in overrideConfig.aUser or Oidc-Auth header',
-        },
-        { status: 401 },
-      );
+    if (!emailFromBody || typeof emailFromBody !== 'string') {
+      return jsonResponse({ error: 'Email is required in overrideConfig.aUser' }, 400);
     }
 
+    // Query user by email
     const serverDB = await getServerDB();
+    const user = await UserModel.findByEmail(serverDB, emailFromBody);
+
+    if (!user) {
+      return jsonResponse({ error: 'User not found with the provided email' }, 404);
+    }
+
+    userId = user.id;
+    jwtPayload = { ...jwtPayload, userId };
+    console.log('Authenticated via email: %s, userId: %s', emailFromBody, userId);
+
     const sessionModel = new SessionModel(serverDB, userId);
     const messageModel = new MessageModel(serverDB, userId);
     const agentModel = new AgentModel(serverDB, userId);
 
-    // ============ 3. Validate agent ============ //
+    // ============ 3. Validate agent and check access ============ //
+    // First check if user has access to this agent
+    const accessibleAgentIds = await agentModel.queryAccessibleAgentIds();
+    console.log('User %s accessible agents: %O', userId, accessibleAgentIds);
+    console.log('Requested agentId: %s', agentId);
+    if (!accessibleAgentIds.includes(agentId)) {
+      console.log('Agent %s not accessible to user %s', agentId, userId);
+      return jsonResponse({ error: 'Agent not found or access denied' }, 404);
+    }
+
+    // Then get agent config
     const agentConfig = await agentModel.getAgentConfigById(agentId);
     if (!agentConfig) {
-      return NextResponse.json({ error: 'Agent not found' }, { status: 404 });
+      return jsonResponse({ error: 'Agent not found' }, 404);
     }
-    log('Found agent: %s', agentId);
+    console.log('Found agent: %s', agentId);
 
     // ============ 4. Session Management with chatId ============ //
     let session: any = null;
@@ -152,7 +171,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ age
 
       if (session) {
         sessionId = session.id;
-        log('Found existing session by chatId: %s', sessionId);
+        console.log('Found existing session by chatId: %s', sessionId);
       } else {
         // Create new session with client_session
         session = await sessionModel.createSessionForExistingAgent(agentId);
@@ -162,13 +181,13 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ age
           .set({ clientSession: chatId })
           .where(eq(sessions.id, session.id));
         sessionId = session.id;
-        log('Created new session with chatId: %s', sessionId);
+        console.log('Created new session with chatId: %s', sessionId);
       }
     } else {
       // Create new session without chatId
       session = await sessionModel.createSessionForExistingAgent(agentId);
       sessionId = session.id;
-      log('Created new session: %s', sessionId);
+      console.log('Created new session: %s', sessionId);
     }
 
     // ============ 5. Get conversation history ============ //
@@ -185,7 +204,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ age
       topicId: session?.topicId || undefined,
     });
 
-    log('Created user message: %s', userMessage.id);
+    console.log('Created user message: %s', userMessage.id);
 
     // ============ 7. Create assistant message (loading) ============ //
     const assistantMessage = await messageModel.create({
@@ -202,7 +221,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ age
       topicId: session?.topicId || undefined,
     });
 
-    log('Created assistant message: %s', assistantMessage.id);
+    console.log('Created assistant message: %s', assistantMessage.id);
 
     // ============ 8. Prepare messages for chat completion ============ //
     const allMessages = [...historyMessages, userMessage as any];
@@ -338,42 +357,43 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ age
                     controller.enqueue(
                       encoder.encode(`event: token\ndata: ${JSON.stringify(data.data)}\n\n`),
                     );
-                  } else switch (data.type) {
- case 'usage': {
-                    finalUsage = data.data;
-                  
- break;
- }
- case 'stop': {
-                    // Update assistant message with full content
-                    await messageModel.update(assistantMessage.id, {
-                      content: accumulatedContent,
-                      error: null,
-                    });
+                  } else
+                    switch (data.type) {
+                      case 'usage': {
+                        finalUsage = data.data;
 
-                    // Send end event
-                    controller.enqueue(
-                      encoder.encode(
-                        `event: end\ndata: ${JSON.stringify({ messageId: assistantMessage.id, usage: finalUsage || {} })}\n\n`,
-                      ),
-                    );
-                  
- break;
- }
- case 'error': {
-                    // Update message with error
-                    await messageModel.update(assistantMessage.id, {
-                      error: data.data,
-                    });
+                        break;
+                      }
+                      case 'stop': {
+                        // Update assistant message with full content
+                        await messageModel.update(assistantMessage.id, {
+                          content: accumulatedContent,
+                          error: null,
+                        });
 
-                    controller.enqueue(
-                      encoder.encode(`event: error\ndata: ${JSON.stringify(data.data)}\n\n`),
-                    );
-                  
- break;
- }
- // No default
- }
+                        // Send end event
+                        controller.enqueue(
+                          encoder.encode(
+                            `event: end\ndata: ${JSON.stringify({ messageId: assistantMessage.id, usage: finalUsage || {} })}\n\n`,
+                          ),
+                        );
+
+                        break;
+                      }
+                      case 'error': {
+                        // Update message with error
+                        await messageModel.update(assistantMessage.id, {
+                          error: data.data,
+                        });
+
+                        controller.enqueue(
+                          encoder.encode(`event: error\ndata: ${JSON.stringify(data.data)}\n\n`),
+                        );
+
+                        break;
+                      }
+                      // No default
+                    }
                 } catch {
                   log('Failed to parse SSE data:', dataStr);
                 }
@@ -419,9 +439,12 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ age
         'Cache-Control': 'no-cache',
         'Content-Type': 'text/event-stream',
         'X-Accel-Buffering': 'no',
+        ...corsHeaders,
       },
     });
   } catch (e) {
+    log('Error in POST /api/v1/prediction: %O', e);
+
     const {
       errorType = ChatErrorType.InternalServerError,
       error: errorContent,
@@ -431,8 +454,13 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ age
     const error = errorContent || e;
 
     const logMethod = AGENT_RUNTIME_ERROR_SET.has(errorType as string) ? 'warn' : 'error';
-    console[logMethod](`Flowise API [${agentId}] ${errorType}:`, error);
+    console[logMethod](`Flowise API [${agentId || 'unknown'}] ${errorType}:`, error);
 
-    return createErrorResponse(errorType, { error, ...res, provider: 'unknown' });
+    const errorResponse = createErrorResponse(errorType, { error, ...res, provider: 'unknown' });
+    // Add CORS headers to error response
+    Object.entries(corsHeaders).forEach(([key, value]) => {
+      errorResponse.headers.set(key, value);
+    });
+    return errorResponse;
   }
 }

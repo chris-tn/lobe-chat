@@ -756,5 +756,29 @@
     "bps": true,
     "folderMillis": 1762244076679,
     "hash": "be7b52d8f09196b7a7fc2e0ecf5d3992309fac022a37eb2786c1f07ae897fdb4"
+  },
+  {
+    "sql": [
+      "CREATE TABLE IF NOT EXISTS \"integrations\" (\n\t\"id\" text PRIMARY KEY NOT NULL,\n\t\"user_id\" text NOT NULL,\n\t\"knowledge_base_id\" text NOT NULL,\n\t\"type\" text NOT NULL,\n\t\"name\" text NOT NULL,\n\t\"description\" text,\n\t\"config\" jsonb NOT NULL,\n\t\"sync_enabled\" boolean DEFAULT true NOT NULL,\n\t\"sync_interval\" integer DEFAULT 3600,\n\t\"status\" text DEFAULT 'active' NOT NULL,\n\t\"last_sync_at\" timestamp with time zone,\n\t\"last_sync_status\" text,\n\t\"error_message\" text,\n\t\"accessed_at\" timestamp with time zone DEFAULT now() NOT NULL,\n\t\"created_at\" timestamp with time zone DEFAULT now() NOT NULL,\n\t\"updated_at\" timestamp with time zone DEFAULT now() NOT NULL\n);\n",
+      "\nCREATE INDEX IF NOT EXISTS \"integrations_user_id_idx\" ON \"integrations\"(\"user_id\");",
+      "\nCREATE INDEX IF NOT EXISTS \"integrations_knowledge_base_id_idx\" ON \"integrations\"(\"knowledge_base_id\");",
+      "\nCREATE INDEX IF NOT EXISTS \"integrations_type_idx\" ON \"integrations\"(\"type\");",
+      "\nDO $$ BEGIN\n ALTER TABLE \"integrations\" ADD CONSTRAINT \"integrations_user_id_users_id_fk\" FOREIGN KEY (\"user_id\") REFERENCES \"public\".\"users\"(\"id\") ON DELETE cascade ON UPDATE no action;\nEXCEPTION\n WHEN duplicate_object THEN null;\nEND $$;\n",
+      "\nDO $$ BEGIN\n ALTER TABLE \"integrations\" ADD CONSTRAINT \"integrations_knowledge_base_id_knowledge_bases_id_fk\" FOREIGN KEY (\"knowledge_base_id\") REFERENCES \"public\".\"knowledge_bases\"(\"id\") ON DELETE cascade ON UPDATE no action;\nEXCEPTION\n WHEN duplicate_object THEN null;\nEND $$;\n",
+      "\nCREATE TABLE IF NOT EXISTS \"integration_syncs\" (\n\t\"id\" text PRIMARY KEY NOT NULL,\n\t\"integration_id\" text NOT NULL,\n\t\"status\" text NOT NULL,\n\t\"started_at\" timestamp with time zone NOT NULL,\n\t\"completed_at\" timestamp with time zone,\n\t\"duration\" integer,\n\t\"files_added\" integer DEFAULT 0,\n\t\"files_updated\" integer DEFAULT 0,\n\t\"files_deleted\" integer DEFAULT 0,\n\t\"files_skipped\" integer DEFAULT 0,\n\t\"error_message\" text,\n\t\"logs\" jsonb,\n\t\"accessed_at\" timestamp with time zone DEFAULT now() NOT NULL,\n\t\"created_at\" timestamp with time zone DEFAULT now() NOT NULL,\n\t\"updated_at\" timestamp with time zone DEFAULT now() NOT NULL\n);\n",
+      "\nCREATE INDEX IF NOT EXISTS \"integration_syncs_integration_id_idx\" ON \"integration_syncs\"(\"integration_id\");",
+      "\nCREATE INDEX IF NOT EXISTS \"integration_syncs_status_idx\" ON \"integration_syncs\"(\"status\");",
+      "\nCREATE INDEX IF NOT EXISTS \"integration_syncs_started_at_idx\" ON \"integration_syncs\"(\"started_at\");",
+      "\nDO $$ BEGIN\n ALTER TABLE \"integration_syncs\" ADD CONSTRAINT \"integration_syncs_integration_id_integrations_id_fk\" FOREIGN KEY (\"integration_id\") REFERENCES \"public\".\"integrations\"(\"id\") ON DELETE cascade ON UPDATE no action;\nEXCEPTION\n WHEN duplicate_object THEN null;\nEND $$;\n",
+      "\nCREATE TABLE IF NOT EXISTS \"integration_file_mappings\" (\n\t\"integration_id\" text NOT NULL,\n\t\"file_id\" text NOT NULL,\n\t\"remote_path\" text NOT NULL,\n\t\"remote_size\" integer,\n\t\"remote_modified_at\" timestamp with time zone,\n\t\"remote_etag\" text,\n\t\"synced_at\" timestamp with time zone DEFAULT now() NOT NULL,\n\t\"last_synced_at\" timestamp with time zone,\n\t\"accessed_at\" timestamp with time zone DEFAULT now() NOT NULL,\n\t\"created_at\" timestamp with time zone DEFAULT now() NOT NULL,\n\t\"updated_at\" timestamp with time zone DEFAULT now() NOT NULL,\n\tCONSTRAINT \"integration_file_mappings_integration_id_file_id_pk\" PRIMARY KEY(\"integration_id\",\"file_id\")\n);\n",
+      "\nCREATE INDEX IF NOT EXISTS \"integration_file_mappings_integration_id_idx\" ON \"integration_file_mappings\"(\"integration_id\");",
+      "\nCREATE INDEX IF NOT EXISTS \"integration_file_mappings_file_id_idx\" ON \"integration_file_mappings\"(\"file_id\");",
+      "\nCREATE INDEX IF NOT EXISTS \"integration_file_mappings_remote_path_idx\" ON \"integration_file_mappings\"(\"remote_path\");",
+      "\nDO $$ BEGIN\n ALTER TABLE \"integration_file_mappings\" ADD CONSTRAINT \"integration_file_mappings_integration_id_integrations_id_fk\" FOREIGN KEY (\"integration_id\") REFERENCES \"public\".\"integrations\"(\"id\") ON DELETE cascade ON UPDATE no action;\nEXCEPTION\n WHEN duplicate_object THEN null;\nEND $$;\n",
+      "\nDO $$ BEGIN\n ALTER TABLE \"integration_file_mappings\" ADD CONSTRAINT \"integration_file_mappings_file_id_files_id_fk\" FOREIGN KEY (\"file_id\") REFERENCES \"public\".\"files\"(\"id\") ON DELETE cascade ON UPDATE no action;\nEXCEPTION\n WHEN duplicate_object THEN null;\nEND $$;\n\n"
+    ],
+    "bps": true,
+    "folderMillis": 1763713084000,
+    "hash": "c9710af20e6dc91204dd79919ace2c0c5d99821421caaa6ef47387d6830c88e7"
   }
 ]

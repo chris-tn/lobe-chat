@@ -56,14 +56,41 @@ export const config = {
 
 const backendApiEndpoints = ['/api', '/trpc', '/webapi', '/oidc'];
 
+/**
+ * CORS headers for cross-origin requests
+ */
+const corsHeaders = {
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS, PATCH',
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Max-Age': '86400',
+};
+
 const defaultMiddleware = (request: NextRequest) => {
   const url = new URL(request.url);
   logDefault('Processing request: %s %s', request.method, request.url);
 
+  // Handle CORS preflight requests for API endpoints
+  if (
+    request.method === 'OPTIONS' &&
+    backendApiEndpoints.some((path) => url.pathname.startsWith(path))
+  ) {
+    logDefault('Handling CORS preflight for: %s', url.pathname);
+    return new NextResponse(null, {
+      headers: corsHeaders,
+      status: 204,
+    });
+  }
+
   // skip all api requests
   if (backendApiEndpoints.some((path) => url.pathname.startsWith(path))) {
     logDefault('Skipping API request: %s', url.pathname);
-    return NextResponse.next();
+    const response = NextResponse.next();
+    // Add CORS headers to API responses
+    Object.entries(corsHeaders).forEach(([key, value]) => {
+      response.headers.set(key, value);
+    });
+    return response;
   }
 
   // 1. Read user preferences from cookies
@@ -224,6 +251,11 @@ const nextAuthMiddleware = NextAuth.auth((req) => {
     userId: session?.user?.id,
   });
 
+  // Add CORS headers to all responses
+  Object.entries(corsHeaders).forEach(([key, value]) => {
+    response.headers.set(key, value);
+  });
+
   // Remove & amend OAuth authorized header
   response.headers.delete(OAUTH_AUTHORIZED);
   if (isLoggedIn) {
@@ -270,6 +302,11 @@ const clerkAuthMiddleware = clerkMiddleware(
     }
 
     const response = defaultMiddleware(req);
+
+    // Add CORS headers to all responses
+    Object.entries(corsHeaders).forEach(([key, value]) => {
+      response.headers.set(key, value);
+    });
 
     const data = await auth();
     logClerk('Clerk auth status: %O', {
