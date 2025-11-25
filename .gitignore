@@ -1,7 +1,6 @@
 # Gitignore for LobeHub
 ################################################################
-data
-s3_data
+
 market-api
 # System files
 .DS_Store
