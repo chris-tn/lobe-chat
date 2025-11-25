@@ -42,6 +42,11 @@ declare global {
       ZITADEL_CLIENT_ID?: string;
       ZITADEL_CLIENT_SECRET?: string;
       ZITADEL_ISSUER?: string;
+
+      // KEYCLOAK
+      AUTH_KEYCLOAK_ID?: string;
+      AUTH_KEYCLOAK_SECRET?: string;
+      AUTH_KEYCLOAK_ISSUER?: string;
     }
   }
 }
@@ -210,6 +215,11 @@ export const getAuthConfig = () => {
 
       // Casdoor
       CASDOOR_WEBHOOK_SECRET: z.string().optional(),
+
+      // KEYCLOAK
+      AUTH_KEYCLOAK_ID: z.string().optional(),
+      AUTH_KEYCLOAK_SECRET: z.string().optional(),
+      AUTH_KEYCLOAK_ISSUER: z.string().optional(),
     },
 
     runtimeEnv: {
@@ -273,6 +283,11 @@ export const getAuthConfig = () => {
 
       // Casdoor
       CASDOOR_WEBHOOK_SECRET: process.env.CASDOOR_WEBHOOK_SECRET,
+
+      // KEYCLOAK
+      AUTH_KEYCLOAK_ID: process.env.AUTH_KEYCLOAK_ID,
+      AUTH_KEYCLOAK_SECRET: process.env.AUTH_KEYCLOAK_SECRET,
+      AUTH_KEYCLOAK_ISSUER: process.env.AUTH_KEYCLOAK_ISSUER,
     },
   });
 };
