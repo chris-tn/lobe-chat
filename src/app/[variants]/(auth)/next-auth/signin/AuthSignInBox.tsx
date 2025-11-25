@@ -7,12 +7,13 @@ import { createStyles } from 'antd-style';
 import { AuthError } from 'next-auth';
 import { signIn } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { memo, useState } from 'react';
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import BrandWatermark from '@/components/BrandWatermark';
 import { ProductLogo } from '@/components/Branding/ProductLogo';
 import AuthIcons from '@/components/NextAuth/AuthIcons';
+import { authEnv } from '@/envs/auth';
 import { useUserStore } from '@/store/user';
 
 const useStyles = createStyles(({ css, token }) => ({
@@ -79,25 +80,60 @@ export default memo(() => {
   // Redirect back to the page url, fallback to '/' if failed
   const callbackUrl = searchParams.get('callbackUrl') ?? '/';
 
-  const handleSignIn = async (provider: string) => {
-    setLoadingProvider(provider);
-    try {
-      await signIn(provider, { redirectTo: callbackUrl });
-    } catch (error) {
-      setLoadingProvider(null);
-      // Signin can fail for a number of reasons, such as the user
-      // not existing, or the user not having the correct role.
-      // In some cases, you may want to redirect to a custom error
-      if (error instanceof AuthError) {
-        return router.push(`/next-auth/?error=${error.type}`);
-      }
+  const handleSignIn = useCallback(
+    async (provider: string) => {
+      setLoadingProvider(provider);
+      try {
+        await signIn(provider, { redirectTo: callbackUrl });
+      } catch (error) {
+        setLoadingProvider(null);
+        // Signin can fail for a number of reasons, such as the user
+        // not existing, or the user not having the correct role.
+        // In some cases, you may want to redirect to a custom error
+        if (error instanceof AuthError) {
+          return router.push(`/next-auth/?error=${error.type}`);
+        }
 
-      // Otherwise if a redirects happens Next.js can handle it
-      // so you can just re-thrown the error and let Next.js handle it.
-      // Docs: https://nextjs.org/docs/app/api-reference/functions/redirect#server-component
-      throw error;
+        // Otherwise if a redirects happens Next.js can handle it
+        // so you can just re-thrown the error and let Next.js handle it.
+        // Docs: https://nextjs.org/docs/app/api-reference/functions/redirect#server-component
+        throw error;
+      }
+    },
+    [callbackUrl, router],
+  );
+
+  // Auto-click SSO button after configured timeout if only 1 provider
+  const autoClickTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const autoClickTimeout = authEnv.NEXT_PUBLIC_AUTH_AUTO_CLICK_TIMEOUT ?? 3000;
+
+  useEffect(() => {
+    // Clear any existing timeout
+    if (autoClickTimeoutRef.current) {
+      clearTimeout(autoClickTimeoutRef.current);
+      autoClickTimeoutRef.current = null;
     }
-  };
+
+    // Only auto-click if there's exactly 1 provider and not already loading
+    if (
+      oAuthSSOProviders &&
+      oAuthSSOProviders.length === 1 &&
+      !loadingProvider &&
+      autoClickTimeout > 0
+    ) {
+      autoClickTimeoutRef.current = setTimeout(() => {
+        handleSignIn(oAuthSSOProviders[0]);
+      }, autoClickTimeout);
+    }
+
+    // Cleanup on unmount or when dependencies change
+    return () => {
+      if (autoClickTimeoutRef.current) {
+        clearTimeout(autoClickTimeoutRef.current);
+        autoClickTimeoutRef.current = null;
+      }
+    };
+  }, [oAuthSSOProviders, loadingProvider, handleSignIn, autoClickTimeout]);
 
   const footerBtns = [
     { href: DOCUMENTS_REFER_URL, id: 0, label: t('footerPageLink__help') },
