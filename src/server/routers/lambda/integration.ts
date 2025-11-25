@@ -54,26 +54,20 @@ export const integrationRouter = router({
     return ctx.integrationService.createIntegration(input);
   }),
 
-  
-  
-/**
+  /**
    * Delete integration
    */
-delete: integrationProcedure
+  delete: integrationProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input, ctx }) => {
       await ctx.integrationService.deleteIntegration(input.id);
       return { success: true };
     }),
 
-  
-  
-
-
-/**
+  /**
    * Get integration by ID
    */
-getById: integrationProcedure
+  getById: integrationProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
       const integration = await ctx.integrationService.getIntegrationById(input.id);
@@ -83,25 +77,19 @@ getById: integrationProcedure
       return integration;
     }),
 
-  
-  
-
-/**
+  /**
    * Get integrations by knowledge base ID
    */
-getByKnowledgeBaseId: integrationProcedure
+  getByKnowledgeBaseId: integrationProcedure
     .input(z.object({ knowledgeBaseId: z.string() }))
     .query(async ({ ctx, input }) => {
       return ctx.integrationService.getIntegrationsByKnowledgeBaseId(input.knowledgeBaseId);
     }),
 
-  
-  
-
-/**
+  /**
    * Get sync status for an integration
    */
-getSyncStatus: integrationProcedure
+  getSyncStatus: integrationProcedure
     .input(z.object({ id: z.string(), limit: z.number().int().positive().default(10).optional() }))
     .query(async ({ ctx, input }) => {
       const { IntegrationModel } = await import('@/database/models/integration');
@@ -125,51 +113,37 @@ getSyncStatus: integrationProcedure
       };
     }),
 
-  
-  
-
-
-/**
+  /**
    * Get all integrations for the user
    */
-list: integrationProcedure.query(async ({ ctx }) => {
+  list: integrationProcedure.query(async ({ ctx }) => {
     return ctx.integrationService.getIntegrations();
   }),
 
-  
-  
-
-
-/**
+  /**
    * Trigger manual sync
    */
-sync: integrationProcedure
+  sync: integrationProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
       const result = await ctx.integrationSyncService.syncIntegration(input.id);
       return result;
     }),
 
-  
-  
-
-
-/**
+  /**
    * Test integration connection
    */
-testConnection: integrationProcedure
+  testConnection: integrationProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
       const isValid = await ctx.integrationService.testIntegration(input.id);
       return { valid: isValid };
     }),
 
-  
-  
-/**
+  /**
    * Update integration
    */
-update: integrationProcedure.input(updateIntegrationSchema).mutation(async ({ input, ctx }) => {
+  update: integrationProcedure.input(updateIntegrationSchema).mutation(async ({ input, ctx }) => {
     const { id, ...updates } = input;
     return ctx.integrationService.updateIntegration(id, updates);
   }),

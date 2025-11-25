@@ -316,7 +316,7 @@
     "@lobehub/lint": "^1.26.2",
     "@lobehub/market-types": "^1.11.4",
     "@lobehub/seo-cli": "^1.7.0",
-    "@napi-rs/canvas": "^0.1.70",
+    "@napi-rs/canvas": "^0.1.81",
     "@next/bundle-analyzer": "^15.5.4",
     "@next/eslint-plugin-next": "^15.5.4",
     "@opentelemetry/semantic-conventions": "^1.36.0",

@@ -4,11 +4,7 @@ import debug from 'debug';
 
 import { IntegrationModel } from '@/database/models/integration';
 import { KnowledgeBaseModel } from '@/database/models/knowledgeBase';
-import {
-  IntegrationItem,
-  NewIntegration,
-  NextcloudConfig,
-} from '@/database/schemas/integration';
+import { IntegrationItem, NewIntegration, NextcloudConfig } from '@/database/schemas/integration';
 
 import { NextcloudService } from './nextcloud';
 

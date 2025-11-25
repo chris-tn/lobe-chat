@@ -13,7 +13,7 @@ import { createInsertSchema } from 'drizzle-zod';
 
 import { idGenerator } from '../utils/idGenerator';
 import { timestamps } from './_helpers';
-import { knowledgeBases , files } from './file';
+import { files, knowledgeBases } from './file';
 import { users } from './user';
 
 /**
@@ -121,7 +121,7 @@ export const integrationSyncs = pgTable(
 
     errorMessage: text('error_message'),
 
-    logs: jsonb('logs').$type<Array<{ level: string; message: string, timestamp: string; }>>(),
+    logs: jsonb('logs').$type<Array<{ level: string; message: string; timestamp: string }>>(),
 
     ...timestamps,
   },
