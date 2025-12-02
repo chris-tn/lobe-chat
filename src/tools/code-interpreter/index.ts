@@ -1,6 +1,6 @@
 import { BuiltinToolManifest } from '@lobechat/types';
 
-export const CodeInterpreterIdentifier = 'lobe-code-interpreter';
+export const CodeInterpreterIdentifier = 'dxai-code-interpreter';
 
 export const CodeInterpreterManifest: BuiltinToolManifest = {
   api: [

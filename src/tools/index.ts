@@ -33,7 +33,6 @@ export const builtinTools: LobeBuiltinTool[] = [
     type: 'builtin',
   },
   {
-    hidden: true,
     identifier: CodeInterpreterManifest.identifier,
     manifest: CodeInterpreterManifest,
     type: 'builtin',

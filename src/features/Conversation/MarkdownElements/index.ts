@@ -23,8 +23,12 @@ const baseElements: MarkdownElement[] = [
  */
 export const getMarkdownElements = (): MarkdownElement[] => {
   try {
-    const { enableChartDisplay } = useServerConfigStore.getState().featureFlags;
-    return enableChartDisplay ? [...baseElements, DxaiChart] : baseElements;
+    if (typeof window !== 'undefined' && window.global_serverConfigStore) {
+      const { enableChartDisplay } = window.global_serverConfigStore.getState().featureFlags;
+      return enableChartDisplay ? [...baseElements, DxaiChart] : baseElements;
+    }
+    // Fallback if store is not initialized yet
+    return baseElements;
   } catch {
     // Fallback if store is not initialized yet
     return baseElements;
