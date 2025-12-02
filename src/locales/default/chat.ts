@@ -15,6 +15,10 @@ export default {
     thought: '思考过程',
     unknownTitle: '未命名作品',
   },
+  chart: {
+    invalidData: '无效的图表数据',
+    unsupportedType: '不支持的图表类型: {{type}}',
+  },
   availableAgents: '可用助手',
   backToBottom: '跳转至当前',
   chatList: {

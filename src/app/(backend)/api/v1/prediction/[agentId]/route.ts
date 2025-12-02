@@ -308,22 +308,34 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ age
     // ============ 10. Transform stream to Flowise format and update message ============ //
     let accumulatedContent = '';
     let finalUsage: any = null;
+    let toolCalls: any[] = [];
+    let toolResults: any[] = [];
+    let sourceDocuments: any[] = [];
+
+    // Helper function to send Flowise format event
+    const sendFlowiseEvent = (
+      controller: ReadableStreamDefaultController<Uint8Array>,
+      encoder: TextEncoder,
+      event: string,
+      data: any,
+    ) => {
+      controller.enqueue(
+        encoder.encode(`data:${JSON.stringify({ event, data })}\n\n`),
+      );
+    };
 
     const flowiseStream = new ReadableStream({
       async start(controller) {
         const encoder = new TextEncoder();
 
-        // Send start event
-        controller.enqueue(
-          encoder.encode(
-            `event: start\ndata: ${JSON.stringify({ chatId: chatId || null, sessionId })}\n\n`,
-          ),
-        );
+        // Send agentFlowEvent INPROGRESS
+        sendFlowiseEvent(controller, encoder, 'agentFlowEvent', 'INPROGRESS');
 
         try {
           const reader = streamResponse.body!.getReader();
           const decoder = new TextDecoder();
           let buffer = '';
+          let currentEventType = ''; // Track current event type from SSE
 
           // eslint-disable-next-line no-constant-condition
           while (true) {
@@ -337,10 +349,14 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ age
             for (const line of lines) {
               if (!line.trim()) continue;
 
+              // Track event type for next data line
+              if (line.startsWith('id:')) {
+                // Skip id lines
+                continue;
+              }
+
               if (line.startsWith('event:')) {
-                // Parse event type but not used in current implementation
-                // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                const _eventType = line.split('event:')[1].trim();
+                currentEventType = line.split('event:')[1].trim();
                 continue;
               }
 
@@ -351,52 +367,149 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ age
                 try {
                   const data = JSON.parse(dataStr);
 
-                  if (data.type === 'text' && data.data) {
-                    accumulatedContent += data.data;
-                    // Send token event for Flowise
-                    controller.enqueue(
-                      encoder.encode(`event: token\ndata: ${JSON.stringify(data.data)}\n\n`),
-                    );
-                  } else
-                    switch (data.type) {
-                      case 'usage': {
-                        finalUsage = data.data;
-
-                        break;
+                  // Use tracked event type instead of checking data.type
+                  switch (currentEventType) {
+                    case 'text': {
+                      // data is the text content directly (e.g., "Hello")
+                      const textContent = typeof data === 'string' ? data : data.data || data;
+                      if (textContent) {
+                        accumulatedContent += textContent;
+                        // Send token event in Flowise format
+                        sendFlowiseEvent(controller, encoder, 'token', textContent);
                       }
-                      case 'stop': {
-                        // Update assistant message with full content
-                        await messageModel.update(assistantMessage.id, {
-                          content: accumulatedContent,
-                          error: null,
-                        });
-
-                        // Send end event
-                        controller.enqueue(
-                          encoder.encode(
-                            `event: end\ndata: ${JSON.stringify({ messageId: assistantMessage.id, usage: finalUsage || {} })}\n\n`,
-                          ),
-                        );
-
-                        break;
-                      }
-                      case 'error': {
-                        // Update message with error
-                        await messageModel.update(assistantMessage.id, {
-                          error: data.data,
-                        });
-
-                        controller.enqueue(
-                          encoder.encode(`event: error\ndata: ${JSON.stringify(data.data)}\n\n`),
-                        );
-
-                        break;
-                      }
-                      // No default
+                      break;
                     }
+                    case 'usage': {
+                      // data is the usage object directly
+                      finalUsage = data;
+                      // Send usageMetadata event in Flowise format
+                      sendFlowiseEvent(controller, encoder, 'usageMetadata', data);
+                      break;
+                    }
+                    case 'stop': {
+                      // Update assistant message with full content
+                      await messageModel.update(assistantMessage.id, {
+                        content: accumulatedContent,
+                        error: null,
+                      });
+
+                      // Extract tool results and source documents from messages
+                      const allMessages = await messageModel.query(
+                        { sessionId },
+                        { postProcessUrl: async (path) => path || '' },
+                      );
+
+                      // Find tool messages (messages with role='tool')
+                      const toolMessages = allMessages.filter((msg: any) => msg.role === 'tool');
+
+                      if (toolMessages.length > 0) {
+                        // Capture toolCalls to avoid closure issue
+                        const capturedToolCalls = toolCalls;
+                        toolResults = toolMessages.map((toolMsg: any) => {
+                          let toolOutput = toolMsg.content;
+                          try {
+                            // Try to parse as JSON
+                            const parsed = JSON.parse(toolMsg.content);
+                            toolOutput = parsed;
+                          } catch {
+                            // Keep as string if not JSON
+                          }
+
+                          // Extract source documents if available
+                          if (toolOutput && typeof toolOutput === 'string') {
+                            // Try to extract source documents from tool output
+                            const sourceDocMatch = toolOutput.match(/<document_metadata>[\s\S]*?<\/document_metadata>/g);
+                            if (sourceDocMatch) {
+                              sourceDocuments.push(...sourceDocMatch.map((doc: string) => ({
+                                pageContent: doc,
+                                metadata: {},
+                              })));
+                            }
+                          }
+
+                          return {
+                            tool: toolMsg.tool_call_id || toolMsg.name || 'unknown',
+                            toolInput: capturedToolCalls.find((tc: any) => tc.id === toolMsg.tool_call_id)?.args || {},
+                            toolOutput: toolOutput,
+                          };
+                        });
+
+                        // Send usedTools event
+                        if (toolResults.length > 0) {
+                          sendFlowiseEvent(controller, encoder, 'usedTools', toolResults);
+                        }
+
+                        // Send sourceDocuments event if available
+                        if (sourceDocuments.length > 0) {
+                          sendFlowiseEvent(controller, encoder, 'sourceDocuments', sourceDocuments);
+                        }
+                      }
+
+                      // Send calledTools event if empty (to match Flowise format)
+                      if (toolCalls.length === 0) {
+                        sendFlowiseEvent(controller, encoder, 'calledTools', '[]');
+                      }
+
+                      // Send agentFlowEvent FINISHED
+                      sendFlowiseEvent(controller, encoder, 'agentFlowEvent', 'FINISHED');
+
+                      // Send metadata event
+                      sendFlowiseEvent(controller, encoder, 'metadata', {
+                        chatId: chatId || null,
+                        chatMessageId: assistantMessage.id,
+                        question,
+                        sessionId,
+                      });
+
+                      // Send end event
+                      sendFlowiseEvent(controller, encoder, 'end', '[DONE]');
+                      break;
+                    }
+                    case 'error': {
+                      // Update message with error
+                      await messageModel.update(assistantMessage.id, {
+                        error: data,
+                      });
+
+                      sendFlowiseEvent(controller, encoder, 'error', data);
+                      break;
+                    }
+                    case 'reasoning': {
+                      // Handle reasoning/thinking content (skip for now)
+                      break;
+                    }
+                    case 'tool_calls': {
+                      // Handle tool calls - data is array of tool call chunks
+                      if (Array.isArray(data)) {
+                        toolCalls = data.map((toolCall: any) => ({
+                          name: toolCall.function?.name || toolCall.name,
+                          args: toolCall.function?.arguments
+                            ? typeof toolCall.function.arguments === 'string'
+                              ? JSON.parse(toolCall.function.arguments)
+                              : toolCall.function.arguments
+                            : toolCall.arguments || {},
+                          id: toolCall.id,
+                          type: toolCall.type || 'tool_call',
+                        }));
+
+                        // Send calledTools event
+                        sendFlowiseEvent(
+                          controller,
+                          encoder,
+                          'calledTools',
+                          JSON.stringify(toolCalls),
+                        );
+                      }
+                      break;
+                    }
+                    // No default - ignore unknown event types
+                  }
                 } catch {
                   log('Failed to parse SSE data:', dataStr);
                 }
+
+                // Reset event type after processing data
+                currentEventType = '';
               }
             }
           }
@@ -408,11 +521,81 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ age
               error: null,
             });
 
-            controller.enqueue(
-              encoder.encode(
-                `event: end\ndata: ${JSON.stringify({ messageId: assistantMessage.id, usage: finalUsage || {} })}\n\n`,
-              ),
+            // Extract tool results and source documents from messages
+            const allMessages = await messageModel.query(
+              { sessionId },
+              { postProcessUrl: async (path) => path || '' },
             );
+
+            // Find tool messages (messages with role='tool')
+            const toolMessages = allMessages.filter((msg: any) => msg.role === 'tool');
+
+            if (toolMessages.length > 0) {
+              // Capture toolCalls to avoid closure issue
+              const capturedToolCalls = toolCalls;
+              toolResults = toolMessages.map((toolMsg: any) => {
+                let toolOutput = toolMsg.content;
+                try {
+                  // Try to parse as JSON
+                  const parsed = JSON.parse(toolMsg.content);
+                  toolOutput = parsed;
+                } catch {
+                  // Keep as string if not JSON
+                }
+
+                // Extract source documents if available
+                if (toolOutput && typeof toolOutput === 'string') {
+                  // Try to extract source documents from tool output
+                  const sourceDocMatch = toolOutput.match(/<document_metadata>[\s\S]*?<\/document_metadata>/g);
+                  if (sourceDocMatch) {
+                    sourceDocuments.push(...sourceDocMatch.map((doc: string) => ({
+                      pageContent: doc,
+                      metadata: {},
+                    })));
+                  }
+                }
+
+                return {
+                  tool: toolMsg.tool_call_id || toolMsg.name || 'unknown',
+                  toolInput: capturedToolCalls.find((tc: any) => tc.id === toolMsg.tool_call_id)?.args || {},
+                  toolOutput: toolOutput,
+                };
+              });
+
+              // Send usedTools event
+              if (toolResults.length > 0) {
+                sendFlowiseEvent(controller, encoder, 'usedTools', toolResults);
+              }
+
+              // Send sourceDocuments event if available
+              if (sourceDocuments.length > 0) {
+                sendFlowiseEvent(controller, encoder, 'sourceDocuments', sourceDocuments);
+              }
+            }
+
+            // Send calledTools event if empty (to match Flowise format)
+            if (toolCalls.length === 0) {
+              sendFlowiseEvent(controller, encoder, 'calledTools', '[]');
+            }
+
+            // Send agentFlowEvent FINISHED
+            sendFlowiseEvent(controller, encoder, 'agentFlowEvent', 'FINISHED');
+
+            // Send usageMetadata if available
+            if (finalUsage) {
+              sendFlowiseEvent(controller, encoder, 'usageMetadata', finalUsage);
+            }
+
+            // Send metadata event
+            sendFlowiseEvent(controller, encoder, 'metadata', {
+              chatId: chatId || null,
+              chatMessageId: assistantMessage.id,
+              question,
+              sessionId,
+            });
+
+            // Send end event
+            sendFlowiseEvent(controller, encoder, 'end', '[DONE]');
           }
         } catch (error) {
           log('Stream error:', error);
@@ -423,11 +606,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ age
             },
           });
 
-          controller.enqueue(
-            encoder.encode(
-              `event: error\ndata: ${JSON.stringify({ message: (error as Error).message })}\n\n`,
-            ),
-          );
+          sendFlowiseEvent(controller, encoder, 'error', {
+            message: (error as Error).message,
+          });
         } finally {
           controller.close();
         }

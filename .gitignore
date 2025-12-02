@@ -1,7 +1,6 @@
 # Gitignore for LobeHub
 ################################################################
-data
-s3_data
+
 market-api
 # System files
 .DS_Store
@@ -121,3 +120,6 @@ CLAUDE.local.md
 prd
 GEMINI.md
 e2e/reports
+
+s3_data/
+data/
