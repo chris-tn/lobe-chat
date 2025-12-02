@@ -28,15 +28,25 @@ import { useUserStore } from '@/store/user';
 import { userGeneralSettingsSelectors, userProfileSelectors } from '@/store/user/selectors';
 
 import ErrorMessageExtra, { useErrorContent } from '../../Error';
-import { markdownElements } from '../../MarkdownElements';
+import { featureFlagsSelectors, useServerConfigStore } from '@/store/serverConfig';
+
+import { getMarkdownElements } from '../../MarkdownElements';
 import { useDoubleClickEdit } from '../../hooks/useDoubleClickEdit';
 import { normalizeThinkTags, processWithArtifact } from '../../utils/markdown';
 import { AssistantActionsBar } from './Actions';
 import { AssistantMessageExtra } from './Extra';
 import { AssistantMessageContent } from './MessageContent';
 
-const rehypePlugins = markdownElements.map((element) => element.rehypePlugin).filter(Boolean);
-const remarkPlugins = markdownElements.map((element) => element.remarkPlugin).filter(Boolean);
+// Note: Plugins are created at module level, so they include all elements
+// Feature flag check happens in component rendering
+const getRehypePlugins = () =>
+  getMarkdownElements()
+    .map((element) => element.rehypePlugin)
+    .filter(Boolean);
+const getRemarkPlugins = () =>
+  getMarkdownElements()
+    .map((element) => element.remarkPlugin)
+    .filter(Boolean);
 
 const isHtmlCode = (content: string, language: string) => {
   return (
@@ -136,17 +146,22 @@ const AssistantMessage = memo<AssistantMessageProps>((props) => {
   // maybe we can remove it in React 19
   // ======================================================================== //
 
+  const enableChartDisplay = useServerConfigStore(featureFlagsSelectors).enableChartDisplay;
+
   const components = useMemo(
     () =>
       Object.fromEntries(
-        markdownElements.map((element) => {
+        getMarkdownElements().map((element) => {
           const Component = element.Component;
 
           return [element.tag, (props: any) => <Component {...props} id={id} />];
         }),
       ),
-    [id],
+    [id, enableChartDisplay],
   );
+
+  const rehypePlugins = useMemo(() => getRehypePlugins(), [enableChartDisplay]);
+  const remarkPlugins = useMemo(() => getRemarkPlugins(), [enableChartDisplay]);
 
   const markdownProps = useMemo(
     () => ({
@@ -179,7 +194,7 @@ const AssistantMessage = memo<AssistantMessageProps>((props) => {
         // if the citations's url and title are all the same, we should not show the citations
         search?.citations.every((item) => item.title !== item.url),
     }),
-    [animated, components, role, search, highlighterTheme, mermaidTheme],
+    [animated, components, role, search, highlighterTheme, mermaidTheme, rehypePlugins, remarkPlugins],
   );
 
   const [isInbox] = useSessionStore((s) => [sessionSelectors.isInboxSession(s)]);

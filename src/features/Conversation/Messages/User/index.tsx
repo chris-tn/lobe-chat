@@ -10,7 +10,9 @@ import BorderSpacing from '@/features/ChatItem/components/BorderSpacing';
 import MessageContent from '@/features/ChatItem/components/MessageContent';
 import Title from '@/features/ChatItem/components/Title';
 import { useStyles } from '@/features/ChatItem/style';
-import { markdownElements } from '@/features/Conversation/MarkdownElements';
+import { featureFlagsSelectors, useServerConfigStore } from '@/store/serverConfig';
+
+import { getMarkdownElements } from '@/features/Conversation/MarkdownElements';
 import { useUserAvatar } from '@/hooks/useUserAvatar';
 import { useAgentStore } from '@/store/agent';
 import { agentChatConfigSelectors } from '@/store/agent/selectors';
@@ -33,15 +35,17 @@ interface UserMessageProps extends UIChatMessage {
   index: number;
 }
 
-const rehypePlugins = markdownElements
-  .filter((s) => s.scope !== 'assistant')
-  .map((element) => element.rehypePlugin)
-  .filter(Boolean);
+const getRehypePlugins = () =>
+  getMarkdownElements()
+    .filter((s) => s.scope !== 'assistant')
+    .map((element) => element.rehypePlugin)
+    .filter(Boolean);
 
-const remarkPlugins = markdownElements
-  .filter((s) => s.scope !== 'assistant')
-  .map((element) => element.remarkPlugin)
-  .filter(Boolean);
+const getRemarkPlugins = () =>
+  getMarkdownElements()
+    .filter((s) => s.scope !== 'assistant')
+    .map((element) => element.remarkPlugin)
+    .filter(Boolean);
 
 const UserMessage = memo<UserMessageProps>((props) => {
   const { id, ragQuery, content, createdAt, error, role, index, extra, disableEditing, targetId } =
@@ -102,17 +106,22 @@ const UserMessage = memo<UserMessageProps>((props) => {
     [props],
   );
 
+  const enableChartDisplay = useServerConfigStore(featureFlagsSelectors).enableChartDisplay;
+
   const components = useMemo(
     () =>
       Object.fromEntries(
-        markdownElements.map((element) => {
+        getMarkdownElements().map((element) => {
           const Component = element.Component;
 
           return [element.tag, (props: any) => <Component {...props} id={id} />];
         }),
       ),
-    [id],
+    [id, enableChartDisplay],
   );
+
+  const rehypePlugins = useMemo(() => getRehypePlugins(), [enableChartDisplay]);
+  const remarkPlugins = useMemo(() => getRemarkPlugins(), [enableChartDisplay]);
 
   const markdownProps = useMemo(
     () => ({
