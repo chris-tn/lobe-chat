@@ -15,7 +15,7 @@ import { LobeAgentChatConfig, LobeAgentConfig } from '@/types/agent';
 import { KnowledgeItem } from '@/types/knowledgeBase';
 import { merge } from '@/utils/merge';
 
-import type { AgentStoreState } from '../../initialState';
+import type { AgentStore } from '../../store';
 import { agentSelectors } from './selectors';
 
 /**
@@ -58,9 +58,6 @@ export interface AgentChatAction {
 
 const FETCH_AGENT_CONFIG_KEY = 'FETCH_AGENT_CONFIG';
 const FETCH_AGENT_KNOWLEDGE_KEY = 'FETCH_AGENT_KNOWLEDGE';
-
-// Define AgentStore type locally to avoid circular dependency with store.ts
-type AgentStore = AgentChatAction & AgentStoreState;
 
 export const createChatSlice: StateCreator<
   AgentStore,
