@@ -23,25 +23,25 @@ const inboxAgentModel = (s: AgentStoreState) => inboxAgentConfig(s).model;
 
 const getAgentConfigById =
   (id: string) =>
-  (s: AgentStoreState): LobeAgentConfig =>
-    merge(s.defaultAgentConfig, s.agentMap[id]);
+    (s: AgentStoreState): LobeAgentConfig =>
+      merge(s.defaultAgentConfig, s.agentMap[id]);
 
 const getAgentConfigByAgentId =
   (agentId: string) =>
-  (s: AgentStoreState): LobeAgentConfig => {
-    // Find the session that contains this agent
-    const sessionId = Object.keys(s.agentMap).find((sessionKey) => {
-      const agentConfig = s.agentMap[sessionKey];
-      return agentConfig?.id === agentId;
-    });
+    (s: AgentStoreState): LobeAgentConfig => {
+      // Find the session that contains this agent
+      const sessionId = Object.keys(s.agentMap).find((sessionKey) => {
+        const agentConfig = s.agentMap[sessionKey];
+        return agentConfig?.id === agentId;
+      });
 
-    if (sessionId) {
-      return merge(s.defaultAgentConfig, s.agentMap[sessionId]);
-    }
+      if (sessionId) {
+        return merge(s.defaultAgentConfig, s.agentMap[sessionId]);
+      }
 
-    // Fallback to default config if agent not found
-    return s.defaultAgentConfig;
-  };
+      // Fallback to default config if agent not found
+      return s.defaultAgentConfig;
+    };
 
 export const currentAgentConfig = (s: AgentStoreState): LobeAgentConfig =>
   getAgentConfigById(s.activeId)(s);
@@ -97,26 +97,26 @@ const currentAgentTTS = (s: AgentStoreState): LobeAgentTTSConfig => {
 
 const currentAgentTTSVoice =
   (lang: string) =>
-  (s: AgentStoreState): string => {
-    const { voice, ttsService } = currentAgentTTS(s);
-    const voiceList = new VoiceList(lang);
-    let currentVoice;
-    switch (ttsService) {
-      case 'openai': {
-        currentVoice = voice.openai || (VoiceList.openaiVoiceOptions?.[0].value as string);
-        break;
+    (s: AgentStoreState): string => {
+      const { voice, ttsService } = currentAgentTTS(s);
+      const voiceList = new VoiceList(lang);
+      let currentVoice;
+      switch (ttsService) {
+        case 'openai': {
+          currentVoice = voice.openai || (VoiceList.openaiVoiceOptions?.[0].value as string);
+          break;
+        }
+        case 'edge': {
+          currentVoice = voice.edge || (voiceList.edgeVoiceOptions?.[0].value as string);
+          break;
+        }
+        case 'microsoft': {
+          currentVoice = voice.microsoft || (voiceList.microsoftVoiceOptions?.[0].value as string);
+          break;
+        }
       }
-      case 'edge': {
-        currentVoice = voice.edge || (voiceList.edgeVoiceOptions?.[0].value as string);
-        break;
-      }
-      case 'microsoft': {
-        currentVoice = voice.microsoft || (voiceList.microsoftVoiceOptions?.[0].value as string);
-        break;
-      }
-    }
-    return currentVoice || 'alloy';
-  };
+      return currentVoice || 'alloy';
+    };
 
 const currentEnabledKnowledge = (s: AgentStoreState) => {
   const knowledgeBases = currentAgentKnowledgeBases(s);
