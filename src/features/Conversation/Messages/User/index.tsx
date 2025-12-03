@@ -10,9 +10,8 @@ import BorderSpacing from '@/features/ChatItem/components/BorderSpacing';
 import MessageContent from '@/features/ChatItem/components/MessageContent';
 import Title from '@/features/ChatItem/components/Title';
 import { useStyles } from '@/features/ChatItem/style';
-import { featureFlagsSelectors, useServerConfigStore } from '@/store/serverConfig';
-
 import { getMarkdownElements } from '@/features/Conversation/MarkdownElements';
+import { useEnableChartDisplay } from '@/hooks/useEnableChartDisplay';
 import { useUserAvatar } from '@/hooks/useUserAvatar';
 import { useAgentStore } from '@/store/agent';
 import { agentChatConfigSelectors } from '@/store/agent/selectors';
@@ -106,7 +105,7 @@ const UserMessage = memo<UserMessageProps>((props) => {
     [props],
   );
 
-  const enableChartDisplay = useServerConfigStore(featureFlagsSelectors).enableChartDisplay;
+  const enableChartDisplay = useEnableChartDisplay();
 
   const components = useMemo(
     () =>
