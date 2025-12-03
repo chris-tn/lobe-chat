@@ -28,9 +28,8 @@ import { useUserStore } from '@/store/user';
 import { userGeneralSettingsSelectors, userProfileSelectors } from '@/store/user/selectors';
 
 import ErrorMessageExtra, { useErrorContent } from '../../Error';
-import { featureFlagsSelectors, useServerConfigStore } from '@/store/serverConfig';
-
 import { getMarkdownElements } from '../../MarkdownElements';
+import { useEnableChartDisplay } from '@/hooks/useEnableChartDisplay';
 import { useDoubleClickEdit } from '../../hooks/useDoubleClickEdit';
 import { normalizeThinkTags, processWithArtifact } from '../../utils/markdown';
 import { AssistantActionsBar } from './Actions';
@@ -146,7 +145,7 @@ const AssistantMessage = memo<AssistantMessageProps>((props) => {
   // maybe we can remove it in React 19
   // ======================================================================== //
 
-  const enableChartDisplay = useServerConfigStore(featureFlagsSelectors).enableChartDisplay;
+  const enableChartDisplay = useEnableChartDisplay();
 
   const components = useMemo(
     () =>
