@@ -8,10 +8,13 @@ import {
 import { KnowledgeItem, KnowledgeType, LobeAgentConfig, LobeAgentTTSConfig } from '@lobechat/types';
 import { VoiceList } from '@lobehub/tts';
 
-import { DEFAULT_OPENING_QUESTIONS } from '@/features/AgentSetting/store/selectors';
 import { filterToolIds } from '@/helpers/toolFilters';
 import { AgentStoreState } from '@/store/agent/initialState';
 import { merge } from '@/utils/merge';
+
+// Define locally to avoid circular dependency via @/features/AgentSetting/store/selectors
+// which imports chatService → @/store/agent → createChatSlice
+const DEFAULT_OPENING_QUESTIONS: string[] = [];
 
 const isInboxSession = (s: AgentStoreState) => s.activeId === INBOX_SESSION_ID;
 
