@@ -15,7 +15,7 @@ import { LobeAgentChatConfig, LobeAgentConfig } from '@/types/agent';
 import { KnowledgeItem } from '@/types/knowledgeBase';
 import { merge } from '@/utils/merge';
 
-import type { AgentStore } from '../../store';
+import type { AgentStore } from '../../types';
 import { agentSelectors } from './selectors';
 
 /**
