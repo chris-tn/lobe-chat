@@ -7,9 +7,9 @@ import { initialState } from './initialState';
 import { createChatSlice } from './slices/chat/action';
 import type { AgentStore } from './types';
 
-const createStore: StateCreator<AgentStore, [['zustand/devtools', never]]> = (...parameters) => ({
+const createStore: StateCreator<AgentStore, [['zustand/devtools', never]]> = (set, get) => ({
   ...initialState,
-  ...createChatSlice(...parameters),
+  ...createChatSlice(set, get),
 });
 
 //  ===============  implement useStore ============ //
