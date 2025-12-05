@@ -6,7 +6,7 @@ import { manifestModule } from '@/server/manifest';
 
 const manifest = (): MetadataRoute.Manifest | any => {
   return manifestModule.generate({
-    description: `${BRANDING_NAME} brings you the best UI experience for ChatGPT, Claude, Gemini, and OLLaMA.`,
+    description: `${BRANDING_NAME} - Your private AI Workspace.`,
     icons: [
       {
         purpose: 'any',
@@ -34,47 +34,47 @@ const manifest = (): MetadataRoute.Manifest | any => {
     screenshots: BRANDING_LOGO_URL
       ? []
       : [
-          {
-            form_factor: 'narrow',
-            url: '/screenshots/shot-1.mobile.png',
-          },
-          {
-            form_factor: 'narrow',
-            url: '/screenshots/shot-2.mobile.png',
-          },
-          {
-            form_factor: 'narrow',
-            url: '/screenshots/shot-3.mobile.png',
-          },
-          {
-            form_factor: 'narrow',
-            url: '/screenshots/shot-4.mobile.png',
-          },
-          {
-            form_factor: 'narrow',
-            url: '/screenshots/shot-5.mobile.png',
-          },
-          {
-            form_factor: 'wide',
-            url: '/screenshots/shot-1.desktop.png',
-          },
-          {
-            form_factor: 'wide',
-            url: '/screenshots/shot-2.desktop.png',
-          },
-          {
-            form_factor: 'wide',
-            url: '/screenshots/shot-3.desktop.png',
-          },
-          {
-            form_factor: 'wide',
-            url: '/screenshots/shot-4.desktop.png',
-          },
-          {
-            form_factor: 'wide',
-            url: '/screenshots/shot-5.desktop.png',
-          },
-        ],
+        {
+          form_factor: 'narrow',
+          url: '/screenshots/shot-1.mobile.png',
+        },
+        {
+          form_factor: 'narrow',
+          url: '/screenshots/shot-2.mobile.png',
+        },
+        {
+          form_factor: 'narrow',
+          url: '/screenshots/shot-3.mobile.png',
+        },
+        {
+          form_factor: 'narrow',
+          url: '/screenshots/shot-4.mobile.png',
+        },
+        {
+          form_factor: 'narrow',
+          url: '/screenshots/shot-5.mobile.png',
+        },
+        {
+          form_factor: 'wide',
+          url: '/screenshots/shot-1.desktop.png',
+        },
+        {
+          form_factor: 'wide',
+          url: '/screenshots/shot-2.desktop.png',
+        },
+        {
+          form_factor: 'wide',
+          url: '/screenshots/shot-3.desktop.png',
+        },
+        {
+          form_factor: 'wide',
+          url: '/screenshots/shot-4.desktop.png',
+        },
+        {
+          form_factor: 'wide',
+          url: '/screenshots/shot-5.desktop.png',
+        },
+      ],
   });
 };
 
