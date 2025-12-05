@@ -1,5 +1,5 @@
 import { ActionIcon, ActionIconProps, Hotkey } from '@lobehub/ui';
-import { Compass, FolderClosed, MessageSquare, Palette } from 'lucide-react';
+import { Compass, FolderClosed, MessageSquare, Palette, Users } from 'lucide-react';
 import Link from 'next/link';
 import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -39,6 +39,7 @@ const TopActions = memo<TopActionProps>(({ tab, isPinned }) => {
   const isFilesActive = tab === SidebarTabKey.Files;
   const isDiscoverActive = tab === SidebarTabKey.Discover;
   const isImageActive = tab === SidebarTabKey.Image;
+  const isTeamsActive = tab === SidebarTabKey.Teams;
 
   return (
     <Flexbox gap={8}>
@@ -80,6 +81,15 @@ const TopActions = memo<TopActionProps>(({ tab, isPinned }) => {
           />
         </Link>
       )}
+      <Link aria-label={t('tab.teams')} href={'/teams'}>
+        <ActionIcon
+          active={isTeamsActive}
+          icon={Users}
+          size={ICON_SIZE}
+          title={t('tab.teams')}
+          tooltipProps={{ placement: 'right' }}
+        />
+      </Link>
       {showAiImage && (
         <Link aria-label={t('tab.aiImage')} href={'/image'}>
           <ActionIcon
