@@ -1,6 +1,6 @@
 import isEqual from 'fast-deep-equal';
 import { produce } from 'immer';
-import { SWRResponse, mutate } from 'swr';
+import { mutate } from 'swr';
 import type { PartialDeep } from 'type-fest';
 import { StateCreator } from 'zustand/vanilla';
 
@@ -15,56 +15,17 @@ import { LobeAgentChatConfig, LobeAgentConfig } from '@/types/agent';
 import { KnowledgeItem } from '@/types/knowledgeBase';
 import { merge } from '@/utils/merge';
 
-import type { AgentStore } from '../../types';
+import type { AgentStore, AgentChatAction } from '../../types';
 import { agentSelectors } from './selectors';
-
-/**
- * 助手接口
- */
-export interface AgentChatAction {
-  addFilesToAgent: (fileIds: string[], boolean?: boolean) => Promise<void>;
-  addKnowledgeBaseToAgent: (knowledgeBaseId: string) => Promise<void>;
-  internal_createAbortController: (key: keyof AgentState) => AbortController;
-
-  internal_dispatchAgentMap: (
-    id: string,
-    config: PartialDeep<LobeAgentConfig>,
-    actions?: string,
-  ) => void;
-  internal_refreshAgentConfig: (id: string) => Promise<void>;
-  internal_refreshAgentKnowledge: () => Promise<void>;
-  internal_updateAgentConfig: (
-    id: string,
-    data: PartialDeep<LobeAgentConfig>,
-    signal?: AbortSignal,
-  ) => Promise<void>;
-  removeFileFromAgent: (fileId: string) => Promise<void>;
-  removeKnowledgeBaseFromAgent: (knowledgeBaseId: string) => Promise<void>;
-
-  removePlugin: (id: string) => void;
-  toggleFile: (id: string, open?: boolean) => Promise<void>;
-  toggleKnowledgeBase: (id: string, open?: boolean) => Promise<void>;
-
-  togglePlugin: (id: string, open?: boolean) => Promise<void>;
-  updateAgentChatConfig: (config: Partial<LobeAgentChatConfig>) => Promise<void>;
-  updateAgentConfig: (config: PartialDeep<LobeAgentConfig>) => Promise<void>;
-  useFetchAgentConfig: (isLogin: boolean | undefined, id: string) => SWRResponse<LobeAgentConfig>;
-  useFetchFilesAndKnowledgeBases: () => SWRResponse<KnowledgeItem[]>;
-  useInitInboxAgentStore: (
-    isLogin: boolean | undefined,
-    defaultAgentConfig?: PartialDeep<LobeAgentConfig>,
-  ) => SWRResponse<PartialDeep<LobeAgentConfig>>;
-}
 
 const FETCH_AGENT_CONFIG_KEY = 'FETCH_AGENT_CONFIG';
 const FETCH_AGENT_KNOWLEDGE_KEY = 'FETCH_AGENT_KNOWLEDGE';
 
-export const createChatSlice: StateCreator<
-  AgentStore,
-  [['zustand/devtools', never]],
-  [],
-  AgentChatAction
-> = (set, get) => ({
+export function createChatSlice(
+  set: Parameters<StateCreator<AgentStore, [['zustand/devtools', never]], [], AgentChatAction>>[0],
+  get: Parameters<StateCreator<AgentStore, [['zustand/devtools', never]], [], AgentChatAction>>[1],
+): AgentChatAction {
+  return {
   addFilesToAgent: async (fileIds, enabled) => {
     const { activeAgentId, internal_refreshAgentConfig, internal_refreshAgentKnowledge } = get();
     if (!activeAgentId) return;
@@ -256,4 +217,5 @@ export const createChatSlice: StateCreator<
 
     return controller;
   },
-});
+  };
+}
