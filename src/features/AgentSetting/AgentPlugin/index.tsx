@@ -137,6 +137,7 @@ const AgentPlugin = memo(() => {
               href={'/'}
               onClick={(e) => {
                 e.preventDefault();
+                if (!isAdmin) return;
                 setShowStore(true);
               }}
             >

@@ -7,6 +7,7 @@ import { Flexbox } from 'react-layout-kit';
 import PluginAvatar from '@/components/Plugins/PluginAvatar';
 import { useCheckPluginsIsInstalled } from '@/hooks/useCheckPluginsIsInstalled';
 import { useFetchInstalledPlugins } from '@/hooks/useFetchInstalledPlugins';
+import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { useAgentStore } from '@/store/agent';
 import { agentSelectors } from '@/store/agent/selectors';
 import { featureFlagsSelectors, useServerConfigStore } from '@/store/serverConfig';
@@ -23,6 +24,7 @@ export const useControls = ({
   setUpdating: (updating: boolean) => void;
 }) => {
   const { t } = useTranslation('setting');
+  const isAdmin = useIsAdmin();
   const list = useToolStore(pluginSelectors.installedPluginMetaList, isEqual);
   const { showDalle } = useServerConfigStore(featureFlagsSelectors);
   const [checked, togglePlugin] = useAgentStore((s) => [
@@ -110,6 +112,7 @@ export const useControls = ({
       key: 'plugin-store',
       label: t('tools.plugins.store'),
       onClick: () => {
+        if (!isAdmin) return;
         setModalOpen(true);
       },
     },
