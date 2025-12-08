@@ -8,6 +8,11 @@ import { ProfileTabs, SettingsTabs, SidebarTabKey } from '@/store/global/initial
 export const useActiveTabKey = () => {
   const pathname = usePathname();
 
+  // Check if it's a custom tab route
+  if (pathname.startsWith('/custom/')) {
+    return SidebarTabKey.Custom;
+  }
+
   return pathname.split('/').find(Boolean)! as SidebarTabKey;
 };
 

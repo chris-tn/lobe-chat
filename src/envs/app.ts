@@ -36,6 +36,7 @@ export const getAppConfig = () => {
     client: {
       NEXT_PUBLIC_ENABLE_SENTRY: z.boolean(),
       NEXT_PUBLIC_ROCKETCHAT_TEAMS_URL: z.string().url().optional(),
+      NEXT_PUBLIC_CUSTOM_TABS: z.string().optional(),
     },
     server: {
       ACCESS_CODES: z.any(z.string()).optional(),
@@ -66,6 +67,8 @@ export const getAppConfig = () => {
       NEXT_PUBLIC_ENABLE_SENTRY: !!process.env.NEXT_PUBLIC_SENTRY_DSN,
 
       NEXT_PUBLIC_ROCKETCHAT_TEAMS_URL: process.env.NEXT_PUBLIC_ROCKETCHAT_TEAMS_URL || ROCKETCHAT_TEAMS_URL,
+
+      NEXT_PUBLIC_CUSTOM_TABS: process.env.NEXT_PUBLIC_CUSTOM_TABS,
 
       ACCESS_CODES: ACCESS_CODES as any,
 

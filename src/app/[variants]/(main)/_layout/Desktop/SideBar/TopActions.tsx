@@ -1,7 +1,8 @@
 import { ActionIcon, ActionIconProps, Hotkey } from '@lobehub/ui';
-import { Compass, FolderClosed, MessageSquare, Palette, Users } from 'lucide-react';
+import { Compass, FolderClosed, MessageSquare, Palette } from 'lucide-react';
 import Link from 'next/link';
-import { memo } from 'react';
+import { usePathname } from 'next/navigation';
+import { memo, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Flexbox } from 'react-layout-kit';
 
@@ -11,7 +12,9 @@ import { featureFlagsSelectors, useServerConfigStore } from '@/store/serverConfi
 import { useSessionStore } from '@/store/session';
 import { useUserStore } from '@/store/user';
 import { settingsSelectors } from '@/store/user/selectors';
+import { parseCustomTabsConfig } from '@/types/customTabs';
 import { HotkeyEnum } from '@/types/hotkey';
+import { getIconByName } from '@/utils/customTabs';
 
 const ICON_SIZE: ActionIconProps['size'] = {
   blockSize: 40,
@@ -27,6 +30,7 @@ export interface TopActionProps {
 //  TODO Change icons
 const TopActions = memo<TopActionProps>(({ tab, isPinned }) => {
   const { t } = useTranslation('common');
+  const pathname = usePathname();
   const switchBackToChat = useGlobalStore((s) => s.switchBackToChat);
   const { showMarket, enableKnowledgeBase, showAiImage } =
     useServerConfigStore(featureFlagsSelectors);
@@ -35,11 +39,17 @@ const TopActions = memo<TopActionProps>(({ tab, isPinned }) => {
   // Check if server mode is enabled
   const isServerMode = process.env.NEXT_PUBLIC_SERVICE_MODE === 'server';
 
+  // Parse custom tabs from environment variable
+  const customTabs = useMemo(() => {
+    const tabs = parseCustomTabsConfig();
+    console.log('[TopActions] Custom tabs:', tabs);
+    return tabs;
+  }, []);
+
   const isChatActive = tab === SidebarTabKey.Chat && !isPinned;
   const isFilesActive = tab === SidebarTabKey.Files;
   const isDiscoverActive = tab === SidebarTabKey.Discover;
   const isImageActive = tab === SidebarTabKey.Image;
-  const isTeamsActive = tab === SidebarTabKey.Teams;
 
   return (
     <Flexbox gap={8}>
@@ -81,15 +91,6 @@ const TopActions = memo<TopActionProps>(({ tab, isPinned }) => {
           />
         </Link>
       )}
-      <Link aria-label={t('tab.teams')} href={'/teams'}>
-        <ActionIcon
-          active={isTeamsActive}
-          icon={Users}
-          size={ICON_SIZE}
-          title={t('tab.teams')}
-          tooltipProps={{ placement: 'right' }}
-        />
-      </Link>
       {showAiImage && (
         <Link aria-label={t('tab.aiImage')} href={'/image'}>
           <ActionIcon
@@ -112,6 +113,22 @@ const TopActions = memo<TopActionProps>(({ tab, isPinned }) => {
           />
         </Link>
       )}
+      {customTabs.map((customTab) => {
+        const Icon = getIconByName(customTab.icon);
+        const isActive = pathname.startsWith(`/custom/${customTab.id}`);
+
+        return (
+          <Link key={customTab.id} aria-label={customTab.name} href={`/custom/${customTab.id}`}>
+            <ActionIcon
+              active={isActive}
+              icon={Icon}
+              size={ICON_SIZE}
+              title={customTab.name}
+              tooltipProps={{ placement: 'right' }}
+            />
+          </Link>
+        );
+      })}
     </Flexbox>
   );
 });

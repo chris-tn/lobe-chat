@@ -41,6 +41,8 @@ export const config = {
     '/image',
     '/knowledge',
     '/knowledge(.*)',
+    '/custom',
+    '/custom(.*)',
     '/profile(.*)',
     '/me',
     '/me(.*)',
