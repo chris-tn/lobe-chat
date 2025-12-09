@@ -8,7 +8,7 @@ import {
   Users,
   Mail,
   Calendar,
-  MailBox
+  Mailbox
 } from 'lucide-react';
 
 /**
@@ -25,7 +25,7 @@ const iconMap: Record<string, LucideIcon> = {
   Palette,
   Mail,
   Calendar,
-  MailBox
+  Mailbox
 };
 
 /**
