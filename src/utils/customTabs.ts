@@ -6,6 +6,9 @@ import {
   MessageSquare,
   Palette,
   Users,
+  Mail,
+  Calendar,
+  MailBox
 } from 'lucide-react';
 
 /**
@@ -20,6 +23,9 @@ const iconMap: Record<string, LucideIcon> = {
   Compass,
   FolderClosed,
   Palette,
+  Mail,
+  Calendar,
+  MailBox
 };
 
 /**
