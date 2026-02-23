@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: scheduler_user
+      POSTGRES_PASSWORD: scheduler_pass
+      POSTGRES_DB: scheduler_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data2:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U scheduler_user -d scheduler_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  scheduler-mcp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: postgresql+asyncpg://scheduler_user:scheduler_pass@postgres:5432/scheduler_db
+      LOBECHAT_API_BASE_URL: ${LOBECHAT_API_BASE_URL:-http://localhost:3210}
+      LOBECHAT_PREDICTION_ENDPOINT: /api/v1/prediction
+      RETRY_MAX_ATTEMPTS: 2
+      RETRY_DELAY_SECONDS: 300
+      WEBHOOK_NOTIFICATION_URL: ${WEBHOOK_NOTIFICATION_URL:-}
+      MCP_SERVER_HOST: 0.0.0.0
+      MCP_SERVER_PORT: 8003
+      CRON_SECRET_TOKEN: ${CRON_SECRET_TOKEN:-}
+    ports:
+      - "8003:8003" # FastMCP MCP protocol port
+      - "8004:8004" # FastAPI HTTP API port (health, cron)
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./alembic/versions:/app/alembic/versions
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8004/health', timeout=5)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  postgres_data2:
