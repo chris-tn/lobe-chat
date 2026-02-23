@@ -474,7 +474,13 @@ export class SessionModel {
       throw new Error('Agent not found.');
     }
 
-    if (agent.userId !== this.userId) {
+    // Check if the update only contains plugins field
+    // Allow plugins update without ownership check (for built-in plugins and shared agents)
+    const dataKeys = Object.keys(data).filter((key) => key !== 'params');
+    const isOnlyPluginsUpdate = dataKeys.length === 1 && dataKeys[0] === 'plugins';
+
+    // Only check ownership if updating fields other than plugins
+    if (!isOnlyPluginsUpdate && agent.userId !== this.userId) {
       throw new Error('You do not have permission to edit this agent (shared agent).');
     }
 
@@ -517,6 +523,11 @@ export class SessionModel {
       if (Object.keys(params).length === 0) {
         mergedValue.params = undefined;
       }
+    }
+
+    // If only updating plugins, don't check userId in where clause
+    if (isOnlyPluginsUpdate) {
+      return this.db.update(agents).set(mergedValue).where(eq(agents.id, session.agent.id));
     }
 
     return this.db
