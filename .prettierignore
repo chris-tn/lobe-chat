@@ -1,6 +1,6 @@
 # Prettierignore for LobeHub
 ################################################################
-
+changelog/v1.json
 # general
 .DS_Store
 .editorconfig
