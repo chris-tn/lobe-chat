@@ -97,6 +97,7 @@ const UserMessage = memo<UserMessageProps>((props) => {
       setMessageItemActionElementPortialContext,
       setMessageItemActionTypeContext,
     ],
+  );
   const onDoubleClick = useDoubleClickEdit({ disableEditing, error, id, index, role });
 
   const renderMessage = useCallback(

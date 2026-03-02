@@ -174,8 +174,6 @@ export function createChatSlice(
         },
       },
     ),
-  /* eslint-disable sort-keys-fix/sort-keys-fix */
-
   internal_dispatchAgentMap: (id, config, actions) => {
     const agentMap = produce(get().agentMap, (draft) => {
       if (!draft[id]) {

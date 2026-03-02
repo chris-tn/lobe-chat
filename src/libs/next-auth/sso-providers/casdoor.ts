@@ -27,13 +27,13 @@ function LobeCasdoorProvider(config: OIDCUserConfig<CasdoorProfile>): OIDCConfig
     name: 'Casdoor',
     profile(profile) {
       // Debug: Log full profile to see what Casdoor returns
-      console.log('=== [Casdoor Profile] ===');
-      console.log('Available fields:', Object.keys(profile));
-      console.log('roles:', profile.roles);
-      console.log('role:', profile.role);
-      console.log('isAdmin:', profile.isAdmin);
-      console.log('is_admin:', profile.is_admin);
-      console.log('========================');
+      console.info('=== [Casdoor Profile] ===');
+      console.info('Available fields:', Object.keys(profile));
+      console.info('roles:', profile.roles);
+      console.info('role:', profile.role);
+      console.info('isAdmin:', profile.isAdmin);
+      console.info('is_admin:', profile.is_admin);
+      console.info('========================');
 
       // Check if user has admin role
       const hasAdminRole =
@@ -42,7 +42,7 @@ function LobeCasdoorProvider(config: OIDCUserConfig<CasdoorProfile>): OIDCConfig
         (Array.isArray(profile.roles) && profile.roles.includes('admin')) ||
         profile.role === 'admin';
 
-      console.log('[Casdoor] Computed isAdmin:', hasAdminRole);
+      console.info('[Casdoor] Computed isAdmin:', hasAdminRole);
 
       return {
         email: profile.email,

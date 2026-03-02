@@ -97,7 +97,7 @@ services:
   lobe:
     build:
       context: .
-      dockerfile: Dockerfile.database
+      dockerfile: Dockerfile
     #image: lobehub/lobe-chat-database
     # Note: webdav package (v5.8.0) is included in dependencies for Nextcloud integration
     container_name: lobe-chat
@@ -113,9 +113,9 @@ services:
         condition: service_started
 
     environment:
-      - 'NEXT_AUTH_SSO_PROVIDERS=keycloak'
+      - 'AUTH_SSO_PROVIDERS=keycloak'
       - 'KEY_VAULTS_SECRET=Kix2wcUONd4CX51E/ZPAd36BqM4wzJgKjPtz2sGztqQ='
-      - 'NEXT_AUTH_SECRET=NX2kaPE923dt6BL2U8e9oSre5RfoT7hg'
+      - 'AUTH_SECRET=NX2kaPE923dt6BL2U8e9oSre5RfoT7hg'
       - 'DATABASE_DRIVER=node'
       - 'DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@postgresql:5432/${LOBE_DB_NAME}'
       - 'S3_BUCKET=${MINIO_LOBE_BUCKET}'

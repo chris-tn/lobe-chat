@@ -76,7 +76,7 @@ export default {
         //console.log('[JWT Callback] isAdmin from token (subsequent request):', isAdmin);
       }
 
-      console.log('[JWT Callback] Final isAdmin:', isAdmin);
+      console.info('[JWT Callback] Final isAdmin:', isAdmin);
       token.isAdmin = isAdmin;
 
       return token;

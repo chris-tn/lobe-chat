@@ -212,12 +212,9 @@ export const agentRouter = router({
           const user = await UserModel.findById(ctx.serverDB, ctx.userId);
           if (!user) return DEFAULT_AGENT_CONFIG;
 
-          const res = await ctx.agentService.createInbox();
-          console.log('create inbox session', res);
           // Only create inbox for admin users
           if (user.isAdmin) {
-            const res = await ctx.agentService.createInbox();
-            pino.info({ res }, 'create inbox session');
+            await ctx.agentService.createInbox();
           } else {
             // Non-admin users cannot create agents
             return DEFAULT_AGENT_CONFIG;
@@ -255,6 +252,8 @@ export const agentRouter = router({
     )
     .query(async ({ input, ctx }) => {
       return ctx.agentService.getBuiltinAgent(input.slug);
+    }),
+
   /**
    * Get agent ID from session ID (for sharing)
    */

@@ -16,7 +16,7 @@ export const parseCustomTabsConfig = (): CustomTab[] => {
     const config = appEnv.NEXT_PUBLIC_CUSTOM_TABS;
 
     // Debug logging (works in both client and server)
-    console.log('[CustomTabs] Env config:', config);
+    console.info('[CustomTabs] Env config:', config);
 
     if (!config || !config.trim()) {
         console.warn('[CustomTabs] No config found or config is empty');
@@ -77,7 +77,7 @@ export const parseCustomTabsConfig = (): CustomTab[] => {
         });
     }
 
-    console.log('[CustomTabs] Parsed tabs:', tabs.map((t) => ({ id: t.id, name: t.name, url: t.url })));
+    console.info('[CustomTabs] Parsed tabs:', tabs.map((t) => ({ id: t.id, name: t.name, url: t.url })));
 
     return tabs;
 };

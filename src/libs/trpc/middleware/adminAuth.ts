@@ -25,9 +25,9 @@ export const adminAuth = trpc.middleware(async (opts) => {
   // Check if user is authenticated
   if (!ctx.userId) {
     if (enableClerk) {
-      console.log('clerk auth:', ctx.clerkAuth);
+      console.info('clerk auth:', ctx.clerkAuth);
     } else {
-      console.log('next auth:', ctx.nextAuth);
+      console.info('next auth:', ctx.nextAuth);
     }
     throw new TRPCError({ code: 'UNAUTHORIZED', message: 'User not authenticated' });
   }

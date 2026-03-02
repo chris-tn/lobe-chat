@@ -516,6 +516,7 @@ export default {
   'userPanel.setting': 'Settings',
   'userPanel.usages': 'Usage Statistics',
   'version': 'Version',
+  clientDB: {
     solve: {
       backup: {
         backup: '备份',

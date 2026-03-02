@@ -1,4 +1,3 @@
-/* eslint-disable sort-keys-fix/sort-keys-fix, typescript-sort-keys/interface */
 import { ToolNameResolver } from '@lobechat/context-engine';
 import {
   ChatErrorType,
@@ -413,7 +412,7 @@ export const chatPlugin: StateCreator<
         await messageService.updateMessage(id, { traceId: res.traceId });
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
       const err = error as Error;
 
       // ignore the aborted request error
@@ -482,7 +481,7 @@ export const chatPlugin: StateCreator<
 
       if (!!result) data = result;
     } catch (error) {
-      console.log(error);
+      console.error(error);
       const err = error as Error;
 
       // ignore the aborted request error
