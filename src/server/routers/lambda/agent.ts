@@ -206,7 +206,7 @@ export const agentRouter = router({
     .query(async ({ input, ctx }) => {
       if (input.sessionId === INBOX_SESSION_ID) {
         const item = await ctx.sessionModel.findByIdOrSlug(INBOX_SESSION_ID);
-        // if there is no session for user, create one
+        // if there is no session for user, create one ONLY if admin
         if (!item) {
           // if there is no user, return default config
           const user = await UserModel.findById(ctx.serverDB, ctx.userId);
@@ -214,6 +214,14 @@ export const agentRouter = router({
 
           const res = await ctx.agentService.createInbox();
           console.log('create inbox session', res);
+          // Only create inbox for admin users
+          if (user.isAdmin) {
+            const res = await ctx.agentService.createInbox();
+            pino.info({ res }, 'create inbox session');
+          } else {
+            // Non-admin users cannot create agents
+            return DEFAULT_AGENT_CONFIG;
+          }
         }
       }
 
@@ -247,6 +255,14 @@ export const agentRouter = router({
     )
     .query(async ({ input, ctx }) => {
       return ctx.agentService.getBuiltinAgent(input.slug);
+  /**
+   * Get agent ID from session ID (for sharing)
+   */
+  getAgentIdBySessionId: agentProcedure
+    .input(z.object({ sessionId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const agent = await ctx.agentModel.findBySessionId(input.sessionId);
+      return agent?.id || null;
     }),
 
   getKnowledgeBasesAndFiles: agentProcedure

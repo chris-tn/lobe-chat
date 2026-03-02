@@ -6,7 +6,7 @@
   },
   "dialect": "postgresql",
   "enums": {},
-  "id": "9233135b-b903-4cb7-88b0-8561d026aff6",
+  "id": "26eece60-78b2-4f0e-a9fe-9f4561435c98",
   "policies": {},
   "prevId": "92d1a656-64ae-4c74-ad6a-b523d4d03c99",
   "roles": {},
@@ -308,6 +308,7 @@
           "with": {}
         }
       },
+      "indexes": {},
       "foreignKeys": {
         "agents_files_file_id_files_id_fk": {
           "name": "agents_files_file_id_files_id_fk",
@@ -433,6 +434,216 @@
         "agents_knowledge_bases_agent_id_knowledge_base_id_pk": {
           "name": "agents_knowledge_bases_agent_id_knowledge_base_id_pk",
           "columns": ["agent_id", "knowledge_base_id"]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.agent_shares": {
+      "name": "agent_shares",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "agent_id": {
+          "name": "agent_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "shared_by_user_id": {
+          "name": "shared_by_user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "shared_with_user_id": {
+          "name": "shared_with_user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "is_global": {
+          "name": "is_global",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "permissions": {
+          "name": "permissions",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'{\"canEdit\":false,\"canUse\":true,\"canView\":true}'::jsonb"
+        },
+        "accessed_at": {
+          "name": "accessed_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "agent_shares_agent_id_agents_id_fk": {
+          "name": "agent_shares_agent_id_agents_id_fk",
+          "tableFrom": "agent_shares",
+          "tableTo": "agents",
+          "columnsFrom": ["agent_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "agent_shares_shared_by_user_id_users_id_fk": {
+          "name": "agent_shares_shared_by_user_id_users_id_fk",
+          "tableFrom": "agent_shares",
+          "tableTo": "users",
+          "columnsFrom": ["shared_by_user_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "agent_shares_shared_with_user_id_users_id_fk": {
+          "name": "agent_shares_shared_with_user_id_users_id_fk",
+          "tableFrom": "agent_shares",
+          "tableTo": "users",
+          "columnsFrom": ["shared_with_user_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "agent_shares_id_pk": {
+          "name": "agent_shares_id_pk",
+          "columns": ["id"]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.chat_group_shares": {
+      "name": "chat_group_shares",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "chat_group_id": {
+          "name": "chat_group_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "shared_by_user_id": {
+          "name": "shared_by_user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "shared_with_user_id": {
+          "name": "shared_with_user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "is_global": {
+          "name": "is_global",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "permissions": {
+          "name": "permissions",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'{\"canEdit\":false,\"canUse\":true,\"canView\":true}'::jsonb"
+        },
+        "accessed_at": {
+          "name": "accessed_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "chat_group_shares_chat_group_id_chat_groups_id_fk": {
+          "name": "chat_group_shares_chat_group_id_chat_groups_id_fk",
+          "tableFrom": "chat_group_shares",
+          "tableTo": "chat_groups",
+          "columnsFrom": ["chat_group_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "chat_group_shares_shared_by_user_id_users_id_fk": {
+          "name": "chat_group_shares_shared_by_user_id_users_id_fk",
+          "tableFrom": "chat_group_shares",
+          "tableTo": "users",
+          "columnsFrom": ["shared_by_user_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "chat_group_shares_shared_with_user_id_users_id_fk": {
+          "name": "chat_group_shares_shared_with_user_id_users_id_fk",
+          "tableFrom": "chat_group_shares",
+          "tableTo": "users",
+          "columnsFrom": ["shared_with_user_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "chat_group_shares_id_pk": {
+          "name": "chat_group_shares_id_pk",
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -5711,6 +5922,7 @@
           "with": {}
         }
       },
+      "indexes": {},
       "foreignKeys": {
         "agents_to_sessions_agent_id_agents_id_fk": {
           "name": "agents_to_sessions_agent_id_agents_id_fk",
@@ -6877,6 +7089,13 @@
         },
         "is_onboarded": {
           "name": "is_onboarded",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "is_admin": {
+          "name": "is_admin",
           "type": "boolean",
           "primaryKey": false,
           "notNull": false,

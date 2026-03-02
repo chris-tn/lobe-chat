@@ -60,25 +60,42 @@ export const evaluateFeatureFlag = (
 
 export const DEFAULT_FEATURE_FLAGS: IFeatureFlags = {
   provider_settings: true,
+  pin_list: false,
 
-  openai_api_key: true,
-  openai_proxy_url: true,
+  // Hide Settings - Users cannot configure providers or LLM settings
+  language_model_settings: false,
+  provider_settings: false,
+
+  // Hide OpenAI API key configuration - must be set via environment variables
+  openai_api_key: false,
+  openai_proxy_url: false,
 
   api_key_manage: false,
   edit_agent: true,
 
   ai_image: true,
 
-  check_updates: true,
+  // Disable agent creation and editing - use predefined assistants only
+  create_session: true,
+  edit_agent: true,
+
+  // Disable plugins, market and image generation
+  plugins: true,
+  dalle: false,
+  ai_image: false,
+
+  check_updates: false,
   welcome_suggest: true,
   token_counter: true,
 
+  // Keep knowledge base and TTS enabled
   knowledge_base: true,
   rag_eval: false,
 
   cloud_promotion: false,
 
-  market: true,
+  // Hide market/discover - users can only use predefined assistants
+  market: false,
   speech_to_text: true,
   changelog: true,
 
@@ -87,6 +104,11 @@ export const DEFAULT_FEATURE_FLAGS: IFeatureFlags = {
   // please contact us for more information: hello@lobehub.com
   commercial_hide_github: false,
   commercial_hide_docs: false,
+  group_chat: true,
+
+  // Hide external links
+  commercial_hide_github: true,
+  commercial_hide_docs: true,
 };
 
 export const mapFeatureFlagsEnvToState = (config: IFeatureFlags, userId?: string) => {

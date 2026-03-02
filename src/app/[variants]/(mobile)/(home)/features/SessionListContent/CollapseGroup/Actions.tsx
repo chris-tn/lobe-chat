@@ -7,6 +7,7 @@ import { memo, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { MemberSelectionModal } from '@/components/MemberSelectionModal';
+import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { useAgentGroupStore } from '@/store/agentGroup';
 import { useSessionStore } from '@/store/session';
@@ -33,6 +34,7 @@ const Actions = memo<ActionsProps>(
     const { modal, message } = App.useApp();
 
     const isMobile = useIsMobile();
+    const isAdmin = useIsAdmin();
     const [isGroupModalOpen, setIsGroupModalOpen] = useState(false);
     const [isCreatingGroup, setIsCreatingGroup] = useState(false);
 
@@ -54,10 +56,12 @@ const Actions = memo<ActionsProps>(
     };
 
     const newAgentPublicItem: MenuItemType = {
+      disabled: !isAdmin,
       icon: <Icon icon={Plus} />,
       key: 'newAgent',
       label: t('newAgent'),
       onClick: async ({ domEvent }) => {
+        if (!isAdmin) return;
         domEvent.stopPropagation();
         const key = 'createNewAgentInGroup';
         message.loading({ content: t('sessionGroup.creatingAgent'), duration: 0, key });
@@ -67,16 +71,20 @@ const Actions = memo<ActionsProps>(
         message.destroy(key);
         message.success({ content: t('sessionGroup.createAgentSuccess') });
       },
+      title: !isAdmin ? t('onlyAdminCanCreate') : undefined,
     };
 
     const newGroupChatItem: MenuItemType = {
+      disabled: !isAdmin,
       icon: <Icon icon={UsersRound} />,
       key: 'newGroupChat',
       label: t('newGroupChat'),
       onClick: ({ domEvent }) => {
+        if (!isAdmin) return;
         domEvent.stopPropagation();
         setIsGroupModalOpen(true);
       },
+      title: !isAdmin ? t('onlyAdminCanCreate') : undefined,
     };
 
     const handleCreateGroupWithMembers = async (

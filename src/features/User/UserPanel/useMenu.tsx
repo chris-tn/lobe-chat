@@ -12,6 +12,36 @@ import useBusinessMenuItems from '@/business/client/features/User/useBusinessMen
 import { type MenuProps } from '@/components/Menu';
 import { DEFAULT_DESKTOP_HOTKEY_CONFIG } from '@/const/desktop';
 import { OFFICIAL_URL } from '@/const/url';
+import { Icon } from '@lobehub/ui';
+import { DiscordIcon } from '@lobehub/ui/icons';
+import { ItemType } from 'antd/es/menu/interface';
+import {
+  Book,
+  CircleUserRound,
+  Cloudy,
+  Download,
+  Feather,
+  FileClockIcon,
+  HardDriveDownload,
+  LifeBuoy,
+  LogOut,
+  Mail,
+} from 'lucide-react';
+import Link from 'next/link';
+import { useTranslation } from 'react-i18next';
+
+import type { MenuProps } from '@/components/Menu';
+import { enableAuth } from '@/const/auth';
+import { BRANDING_EMAIL, LOBE_CHAT_CLOUD, SOCIAL_URL } from '@/const/branding';
+import {
+  CHANGELOG,
+  DOCUMENTS_REFER_URL,
+  GITHUB_ISSUES,
+  OFFICIAL_URL,
+  UTM_SOURCE,
+  mailTo,
+} from '@/const/url';
+import { isDesktop } from '@/const/version';
 import DataImporter from '@/features/DataImporter';
 import { usePlatform } from '@/hooks/usePlatform';
 import { featureFlagsSelectors, useServerConfigStore } from '@/store/serverConfig';
@@ -46,6 +76,8 @@ const NewVersionBadge = memo(
 
 export const useMenu = () => {
   const hasNewVersion = useNewVersion();
+export const useMenu = () => {
+  const { canInstall, install } = usePWAInstall();
   const { t } = useTranslation(['common', 'setting', 'auth']);
   const { showCloudPromotion, hideDocs } = useServerConfigStore(featureFlagsSelectors);
   const [isLogin, isLoginWithAuth] = useUserStore((s) => [
@@ -77,6 +109,8 @@ export const useMenu = () => {
       ),
     },
   ];
+  // Hide settings menu for DxAi - users cannot configure settings
+  const settings: MenuProps['items'] = [];
 
   const downloadClient: MenuProps['items'] = [
     {

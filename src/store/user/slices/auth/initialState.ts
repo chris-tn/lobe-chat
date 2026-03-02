@@ -8,6 +8,13 @@ export interface UserAuthState {
    * Whether user registered with email/password (credential login)
    */
   hasPasswordAccount?: boolean;
+  clerkOpenUserProfile?: (props?: UserProfileProps) => void;
+
+  clerkSession?: SignedInSessionResource;
+  clerkSignIn?: (props?: SignInProps) => void;
+  clerkSignOut?: SignOut;
+  clerkUser?: UserResource;
+  isAdmin?: boolean;
   isLoaded?: boolean;
   isLoadedAuthProviders?: boolean;
 
@@ -16,4 +23,6 @@ export interface UserAuthState {
   user?: LobeUser;
 }
 
-export const initialAuthState: UserAuthState = {};
+export const initialAuthState: UserAuthState = {
+  isAdmin: false,
+};

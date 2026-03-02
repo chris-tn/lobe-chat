@@ -20,6 +20,8 @@ export interface PlanTagProps {
 
 const PlanTag = memo<PlanTagProps>(({ type = PlanType.Preview }) => {
   const { t } = useTranslation('common');
+  // const { t } = useTranslation('common');
+  const theme = useTheme();
 
   if (type === PlanType.Preview) {
     return (
@@ -27,7 +29,7 @@ const PlanTag = memo<PlanTagProps>(({ type = PlanType.Preview }) => {
         style={{ background: cssVar.colorFill, borderRadius: 12, cursor: 'pointer' }}
         variant={'filled'}
       >
-        {t('userPanel.community')}
+        {'VIP'}
       </Tag>
     );
   }

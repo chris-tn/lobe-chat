@@ -30,35 +30,35 @@ export const getAnalyticsConfig = () => {
       REACT_SCAN_MONITOR_API_KEY: z.string().optional(),
     },
     runtimeEnv: {
-      // Plausible Analytics
-      ENABLED_PLAUSIBLE_ANALYTICS: !!process.env.PLAUSIBLE_DOMAIN,
+      // Plausible Analytics - Disabled by default
+      ENABLED_PLAUSIBLE_ANALYTICS: false,
       PLAUSIBLE_DOMAIN: process.env.PLAUSIBLE_DOMAIN,
       PLAUSIBLE_SCRIPT_BASE_URL: process.env.PLAUSIBLE_SCRIPT_BASE_URL || 'https://plausible.io',
 
-      // Posthog Analytics
-      ENABLED_POSTHOG_ANALYTICS: !!process.env.POSTHOG_KEY,
+      // Posthog Analytics - Disabled by default
+      ENABLED_POSTHOG_ANALYTICS: false,
       POSTHOG_KEY: process.env.POSTHOG_KEY,
       POSTHOG_HOST: process.env.POSTHOG_HOST || 'https://app.posthog.com',
       DEBUG_POSTHOG_ANALYTICS: process.env.DEBUG_POSTHOG_ANALYTICS === '1',
 
-      // Umami Analytics
-      ENABLED_UMAMI_ANALYTICS: !!process.env.UMAMI_WEBSITE_ID,
+      // Umami Analytics - Disabled by default
+      ENABLED_UMAMI_ANALYTICS: false,
       UMAMI_SCRIPT_URL: process.env.UMAMI_SCRIPT_URL || 'https://analytics.umami.is/script.js',
       UMAMI_WEBSITE_ID: process.env.UMAMI_WEBSITE_ID,
 
-      // Clarity Analytics
-      ENABLED_CLARITY_ANALYTICS: !!process.env.CLARITY_PROJECT_ID,
+      // Clarity Analytics - Disabled by default
+      ENABLED_CLARITY_ANALYTICS: false,
       CLARITY_PROJECT_ID: process.env.CLARITY_PROJECT_ID,
 
-      // Vercel Analytics
-      ENABLE_VERCEL_ANALYTICS: process.env.ENABLE_VERCEL_ANALYTICS === '1',
+      // Vercel Analytics - Disabled by default
+      ENABLE_VERCEL_ANALYTICS: false,
       DEBUG_VERCEL_ANALYTICS: process.env.DEBUG_VERCEL_ANALYTICS === '1',
 
-      // Google Analytics
-      ENABLE_GOOGLE_ANALYTICS: !!process.env.GOOGLE_ANALYTICS_MEASUREMENT_ID,
+      // Google Analytics - Disabled by default
+      ENABLE_GOOGLE_ANALYTICS: false,
       GOOGLE_ANALYTICS_MEASUREMENT_ID: process.env.GOOGLE_ANALYTICS_MEASUREMENT_ID,
 
-      // React Scan Monitor
+      // React Scan Monitor - Disabled by default
       // https://dashboard.react-scan.com
       REACT_SCAN_MONITOR_API_KEY: process.env.REACT_SCAN_MONITOR_API_KEY,
     },

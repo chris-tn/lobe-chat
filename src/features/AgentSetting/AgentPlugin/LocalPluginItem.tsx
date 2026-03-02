@@ -7,7 +7,7 @@ import { useToolStore } from '@/store/tool';
 
 import { useStore } from '../store';
 
-const MarketList = memo<{ id: string }>(({ id }) => {
+const MarketList = memo<{ disabled?: boolean, id: string; }>(({ id, disabled = false }) => {
   const [toggleAgentPlugin, hasPlugin] = useStore((s) => [s.toggleAgentPlugin, !!s.config.plugins]);
   const plugins = useStore((s) => s.config.plugins || []);
 
@@ -28,7 +28,10 @@ const MarketList = memo<{ id: string }>(({ id }) => {
           // 如果在加载中，说明激活了
           pluginManifestLoading[id] || !hasPlugin ? false : plugins.includes(id)
         }
+        disabled={disabled}
+        loading={pluginManifestLoading[id]}
         onChange={(checked) => {
+          if (disabled) return;
           toggleAgentPlugin(id);
           if (checked) {
             fetchPluginManifest(id);

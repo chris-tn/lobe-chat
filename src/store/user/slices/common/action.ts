@@ -76,6 +76,8 @@ export class CommonActionImpl {
         if (typeof telemetry === 'boolean') return Promise.resolve(false);
 
         return Promise.resolve(this.#get().isUserCanEnableTrace);
+        // Always return false to disable telemetry notification
+        return Promise.resolve(false);
       },
       {
         revalidateOnFocus: false,

@@ -5,12 +5,19 @@ const isDev = process.env.NODE_ENV === 'development';
 export const OFFICIAL_URL = 'https://app.lobehub.com';
 export const OFFICIAL_SITE = 'https://lobehub.com';
 export const OFFICIAL_DOMAIN = 'lobehub.com';
+export const UTM_SOURCE = 'chat_preview';
+
+export const OFFICIAL_URL = 'https://dxai.vn';
+export const OFFICIAL_PREVIEW_URL = 'https://dxai.vn';
+export const OFFICIAL_SITE = 'https://dxai.vn';
 
 export const OG_URL = '/og/og.webp?v=1';
 
-export const GITHUB = 'https://github.com/lobehub/lobe-chat';
+export const GITHUB = 'https://github.com/';
 export const GITHUB_ISSUES = urlJoin(GITHUB, 'issues/new/choose');
 export const CHANGELOG = 'https://lobehub.com/changelog';
+export const CHANGELOG = 'https://dxai.vn/changelog';
+export const DOCKER_IMAGE = 'https://hub.docker.com/r/dxai/dxai';
 
 export const DOCUMENTS = urlJoin(OFFICIAL_SITE, '/docs');
 export const USAGE_DOCUMENTS = urlJoin(DOCUMENTS, '/usage');
@@ -62,7 +69,7 @@ export const RELEASES_URL = urlJoin(GITHUB, 'releases');
 export const mailTo = (email: string) => `mailto:${email}`;
 
 export const AES_GCM_URL = 'https://datatracker.ietf.org/doc/html/draft-ietf-avt-srtp-aes-gcm-01';
-export const BASE_PROVIDER_DOC_URL = 'https://lobehub.com/docs/usage/providers';
+export const BASE_PROVIDER_DOC_URL = 'https://dxai.vn/docs/usage/providers';
 export const SITEMAP_BASE_URL = isDev ? '/sitemap.xml/' : 'sitemap';
 export const CHANGELOG_URL = urlJoin(OFFICIAL_SITE, 'changelog/versions');
 

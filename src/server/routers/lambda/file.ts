@@ -55,6 +55,39 @@ export const fileRouter = router({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      // If uploading to a KB, check if user owns it or has shared access
+      if (input.knowledgeBaseId) {
+        const { KnowledgeBaseModel } = await import('@/database/models/knowledgeBase');
+        const { KnowledgeBaseSharingModel } = await import(
+          '@/database/models/knowledgeBaseSharing'
+        );
+        const kbModel = new KnowledgeBaseModel(ctx.serverDB, ctx.userId);
+        const kb = await kbModel.findById(input.knowledgeBaseId);
+
+        if (!kb) {
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: 'Knowledge base not found',
+          });
+        }
+
+        // Check if user is KB owner
+        const isOwner = kb.userId === ctx.userId;
+
+        // If not owner, check if KB is shared with user
+        if (!isOwner) {
+          const sharingModel = new KnowledgeBaseSharingModel(ctx.serverDB, ctx.userId);
+          const hasAccess = await sharingModel.isKnowledgeBaseShared(input.knowledgeBaseId);
+
+          if (!hasAccess) {
+            throw new TRPCError({
+              code: 'FORBIDDEN',
+              message: 'You do not have permission to upload files to this knowledge base',
+            });
+          }
+        }
+      }
+
       const { isExist } = await ctx.fileModel.checkHash(input.hash!);
 
       // Resolve parentId if it's a slug
@@ -112,7 +145,8 @@ export const fileRouter = router({
       }),
     )
     .query(async ({ ctx, input }) => {
-      const item = await ctx.fileModel.findById(input.id);
+      // Allow access to files in shared KBs
+      const item = await ctx.fileModel.findById(input.id, undefined, true);
       if (!item) throw new TRPCError({ code: 'BAD_REQUEST', message: 'File not found' });
 
       return {
@@ -141,7 +175,8 @@ export const fileRouter = router({
       }),
     )
     .query(async ({ ctx, input }): Promise<FileListItem | undefined> => {
-      const item = await ctx.fileModel.findById(input.id);
+      // Allow access to files in shared KBs
+      const item = await ctx.fileModel.findById(input.id, undefined, true);
 
       if (!item) throw new TRPCError({ code: 'NOT_FOUND', message: 'File not found' });
 

@@ -13,6 +13,7 @@ import { agentCronJobRouter } from './agentCronJob';
 import { agentEvalRouter } from './agentEval';
 import { agentGroupRouter } from './agentGroup';
 import { aiAgentRouter } from './aiAgent';
+import { agentSharingRouter, chatGroupSharingRouter } from './agentSharing';
 import { aiChatRouter } from './aiChat';
 import { aiModelRouter } from './aiModel';
 import { aiProviderRouter } from './aiProvider';
@@ -30,6 +31,7 @@ import { homeRouter } from './home';
 import { imageRouter } from './image';
 import { importerRouter } from './importer';
 import { klavisRouter } from './klavis';
+import { integrationRouter } from './integration';
 import { knowledgeBaseRouter } from './knowledgeBase';
 import { marketRouter } from './market';
 import { messageRouter } from './message';
@@ -55,10 +57,12 @@ export const lambdaRouter = router({
   agentCronJob: agentCronJobRouter,
   agentEval: agentEvalRouter,
   aiAgent: aiAgentRouter,
+  agentSharing: agentSharingRouter,
   aiChat: aiChatRouter,
   aiModel: aiModelRouter,
   aiProvider: aiProviderRouter,
   apiKey: apiKeyRouter,
+  chatGroupSharing: chatGroupSharingRouter,
   chunk: chunkRouter,
   comfyui: comfyuiRouter,
   config: configRouter,
@@ -74,6 +78,7 @@ export const lambdaRouter = router({
   image: imageRouter,
   importer: importerRouter,
   klavis: klavisRouter,
+  integration: integrationRouter,
   knowledgeBase: knowledgeBaseRouter,
   market: marketRouter,
   message: messageRouter,

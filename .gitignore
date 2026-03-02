@@ -1,12 +1,15 @@
 # Gitignore for LobeHub
 ################################################################
-
+data
+s3_data
+market-api
 # System files
 .DS_Store
 Thumbs.db
 ehthumbs.db
 Desktop.ini
-
+searxng-settings.yml
+init_data.json
 # Linux/Ubuntu system files
 *~
 *.swp

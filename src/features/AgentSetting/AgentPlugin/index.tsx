@@ -6,6 +6,9 @@ import { Space, Switch } from 'antd';
 import isEqual from 'fast-deep-equal';
 import { BlocksIcon, LucideTrash2, Store } from 'lucide-react';
 import { memo, useCallback } from 'react';
+import { LucideTrash2 } from 'lucide-react';
+import Link from 'next/link';
+import { memo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -14,6 +17,7 @@ import PluginTag from '@/components/Plugins/PluginTag';
 import { FORM_STYLE } from '@/const/layoutTokens';
 import { createSkillStoreModal } from '@/features/SkillStore';
 import { useFetchInstalledPlugins } from '@/hooks/useFetchInstalledPlugins';
+import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { featureFlagsSelectors, useServerConfigStore } from '@/store/serverConfig';
 import { pluginHelpers, useToolStore } from '@/store/tool';
 import { toolSelectors } from '@/store/tool/selectors';
@@ -26,6 +30,7 @@ import PluginAction from './PluginAction';
 
 const AgentPlugin = memo(() => {
   const { t } = useTranslation('setting');
+  const isAdmin = useIsAdmin();
 
   const navigate = useNavigate();
 
@@ -53,7 +58,7 @@ const AgentPlugin = memo(() => {
     return {
       avatar: <PluginAvatar avatar={pluginHelpers.getPluginAvatar(meta)} size={40} />,
       children: isCustomPlugin ? (
-        <LocalPluginItem id={identifier} />
+        <LocalPluginItem disabled={!isAdmin} id={identifier} />
       ) : (
         <PluginAction identifier={identifier} />
       ),
@@ -128,6 +133,16 @@ const AgentPlugin = memo(() => {
           />
         </Tooltip>
       ) : null}
+      {/* <Tooltip title={t('plugin.store')}>
+        <Button
+          icon={Store}
+          onClick={(e) => {
+            e.stopPropagation();
+            setShowStore(true);
+          }}
+          size={'small'}
+        />
+      </Tooltip> */}
     </Space.Compact>
   );
 

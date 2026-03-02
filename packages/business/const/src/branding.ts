@@ -1,13 +1,12 @@
-// the code below can only be modified with commercial license
-// if you want to use it in the commercial usage
-// please contact us for more information: hello@lobehub.com
+// DxAi - Custom AI Assistant Platform
+// Based on LobeChat Community Edition
 
-export const LOBE_CHAT_CLOUD = 'LobeHub Cloud';
+export const LOBE_CHAT_CLOUD = 'DxAi';
 
-export const BRANDING_NAME = 'LobeHub';
-export const BRANDING_LOGO_URL = '';
+export const BRANDING_NAME = 'DxAi';
+export const BRANDING_LOGO_URL = '/logo.png';
 
-export const ORG_NAME = 'LobeHub';
+export const ORG_NAME = 'DxAi';
 
 export const BRANDING_URL = {
   help: undefined,
@@ -18,11 +17,11 @@ export const BRANDING_URL = {
 };
 
 export const SOCIAL_URL = {
-  discord: 'https://discord.gg/AYFPHvv2jT',
-  github: 'https://github.com/lobehub',
-  medium: 'https://medium.com/@lobehub',
-  x: 'https://x.com/lobehub',
-  youtube: 'https://www.youtube.com/@lobehub',
+  discord: '#',
+  github: '#',
+  medium: '#',
+  x: '#',
+  youtube: '#',
 };
 
 export const FILE_URL = {
@@ -30,8 +29,8 @@ export const FILE_URL = {
 };
 
 export const BRANDING_EMAIL = {
-  business: 'hello@lobehub.com',
-  support: 'support@lobehub.com',
+  business: 'contact@dxai.com',
+  support: 'support@dxai.com',
 };
 
 export const BRANDING_PROVIDER = 'lobehub';

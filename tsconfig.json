@@ -65,6 +65,10 @@
     ".temp",
     "e2e/**",
     "knip.ts"
+    "e2e",
+    "market-api",
+    "packages/obervability-otel/src/node.ts",
+    "packages/utils/tests/setup.ts"
   ],
   "include": [
     "src/**/*.d.ts",

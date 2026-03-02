@@ -109,15 +109,40 @@ export class FileModel {
     const executeInTransaction = async (tx: Transaction) => {
       // In pglite environment, non-transactional operations cannot be used within a transaction as it will block
       const file = await this.findById(id, tx);
+      // pglite 环境下不能再 transaction 中使用非事务操作，会阻塞住
+      const file = await this.findById(id, tx, true); // Use skipUserCheck to allow shared KB access
       if (!file) return;
+
+      // Check if user owns the file or has access via shared KB
+      const isOwner = file.userId === this.userId;
+      let hasSharedAccess = false;
+
+      if (!isOwner) {
+        // Check if file belongs to a shared KB
+        const kbFile = await tx.query.knowledgeBaseFiles.findFirst({
+          where: eq(knowledgeBaseFiles.fileId, id),
+        });
+
+        if (kbFile) {
+          const { KnowledgeBaseSharingModel } = await import('./knowledgeBaseSharing');
+          const sharingModel = new KnowledgeBaseSharingModel(this.db, this.userId);
+          const accessibleKBIds = await sharingModel.getAccessibleKnowledgeBaseIds();
+
+          hasSharedAccess = accessibleKBIds.includes(kbFile.knowledgeBaseId);
+        }
+      }
+
+      if (!isOwner && !hasSharedAccess) {
+        return; // User doesn't have permission to delete this file
+      }
 
       const fileHash = file.fileHash!;
 
       // 2. Delete related chunks
       await this.deleteFileChunks(tx as any, [id]);
 
-      // 3. Delete file record
-      await tx.delete(files).where(and(eq(files.id, id), eq(files.userId, this.userId)));
+      // 3. Delete file record (allow deletion if owner or has shared access)
+      await tx.delete(files).where(eq(files.id, id));
 
       const result = await tx
         .select({ count: count() })
@@ -160,9 +185,41 @@ export class FileModel {
       // 1. First get the file list to return the deleted files
       const fileList = await trx.query.files.findMany({
         where: and(inArray(files.id, ids), eq(files.userId, this.userId)),
+      // 1. Get files that user owns or has access to via shared KBs
+      const { KnowledgeBaseSharingModel } = await import('./knowledgeBaseSharing');
+      const sharingModel = new KnowledgeBaseSharingModel(this.db, this.userId);
+      const accessibleKBIds = await sharingModel.getAccessibleKnowledgeBaseIds();
+
+      // Get all files with the given IDs
+      const allFiles = await trx.query.files.findMany({
+        where: inArray(files.id, ids),
       });
 
-      if (fileList.length === 0) return [];
+      // Wait for all async checks to complete
+      const fileResults = await Promise.all(
+        allFiles.map(async (file) => {
+          const isOwner = file.userId === this.userId;
+          if (isOwner) return file;
+
+          const kbFile = await trx.query.knowledgeBaseFiles.findFirst({
+            where: eq(knowledgeBaseFiles.fileId, file.id),
+          });
+
+          if (kbFile && accessibleKBIds.includes(kbFile.knowledgeBaseId)) {
+            return file;
+          }
+
+          return null;
+        }),
+      );
+      const deletableFiles = fileResults.filter(
+        (file): file is NonNullable<typeof file> => file !== null,
+      );
+
+      if (deletableFiles.length === 0) return [];
+
+      // Extract file IDs that can be deleted
+      const deletableFileIds = deletableFiles.map((file) => file.id);
 
       // Extract file hashes that need to be checked
       const hashList = fileList.map((file) => file.fileHash!).filter(Boolean);
@@ -175,6 +232,17 @@ export class FileModel {
 
       // If global files don't need to be deleted, return directly
       if (!removeGlobalFile || hashList.length === 0) return fileList;
+      // 提取需要检查的文件哈希值
+      const hashList = deletableFiles.map((file) => file.fileHash!).filter(Boolean);
+
+      // 2. 删除相关的 chunks
+      await this.deleteFileChunks(trx as any, deletableFileIds);
+
+      // 3. 删除文件记录 (allow deletion if owner or has shared access)
+      await trx.delete(files).where(inArray(files.id, deletableFileIds));
+
+      // 如果不需要删除全局文件，直接返回
+      if (!removeGlobalFile || hashList.length === 0) return deletableFiles;
 
       // 4. Find hashes that are no longer referenced
       const remainingFiles = await trx
@@ -190,13 +258,15 @@ export class FileModel {
       // Find hashes to delete (those no longer used by any file)
       const hashesToDelete = hashList.filter((hash) => !usedHashes.has(hash));
 
-      if (hashesToDelete.length === 0) return fileList;
+      if (hashesToDelete.length === 0) return deletableFiles;
 
       // 5. Delete global files that are no longer referenced
       await trx.delete(globalFiles).where(inArray(globalFiles.hashId, hashesToDelete));
 
       // Return the list of deleted files
       return fileList;
+      // 返回删除的文件列表
+      return deletableFiles;
     });
   };
 
@@ -213,9 +283,22 @@ export class FileModel {
     showFilesInKnowledgeBase,
   }: QueryFileListParams = {}) => {
     // 1. Build where clause
+    // 1. Check if querying a shared KB - if so, skip userId filter
+    let isSharedKB = false;
+    if (knowledgeBaseId) {
+      const { KnowledgeBaseSharingModel } = await import('./knowledgeBaseSharing');
+      const sharingModel = new KnowledgeBaseSharingModel(this.db, this.userId);
+      const accessibleKBIds = await sharingModel.getAccessibleKnowledgeBaseIds();
+
+      // Check if this KB is shared with user (not owned by user)
+      isSharedKB = accessibleKBIds.includes(knowledgeBaseId);
+    }
+
+    // 2. query where
     let whereClause = and(
       q ? ilike(files.name, `%${q}%`) : undefined,
-      eq(files.userId, this.userId),
+      // Skip userId filter for shared KB files
+      isSharedKB ? undefined : eq(files.userId, this.userId),
     );
     if (category && category !== FilesTabs.All && category !== FilesTabs.Home) {
       const fileTypePrefix = this.getFileTypePrefix(category as FilesTabs);
@@ -231,6 +314,7 @@ export class FileModel {
     }
 
     // 2. Build order clause
+    // 3. order part
 
     let orderByClause = desc(files.createdAt);
     // create a map for sortable fields
@@ -248,6 +332,7 @@ export class FileModel {
     }
 
     // 3. Build base query
+    // 4. build query
     let query = this.db
       .select({
         chunkTaskId: files.chunkTaskId,
@@ -263,6 +348,7 @@ export class FileModel {
       .from(files);
 
     // 4. Add knowledge base query if needed
+    // 5. add knowledge base query
     if (knowledgeBaseId) {
       // if knowledgeBaseId is provided, it means we are querying files in a knowledge-base
 
@@ -276,6 +362,7 @@ export class FileModel {
       );
     }
     // 5. If we don't show files in knowledge base, exclude them
+    // 6.if we don't show files in knowledge base, we need exclude files in knowledge base
     else if (!showFilesInKnowledgeBase) {
       whereClause = and(
         whereClause,
@@ -295,8 +382,41 @@ export class FileModel {
     });
   };
 
-  findById = async (id: string, trx?: Transaction) => {
+  findById = async (id: string, trx?: Transaction, skipUserCheck: boolean = false) => {
     const database = trx || this.db;
+
+    // If skipUserCheck, allow access to files in shared KBs
+    if (skipUserCheck) {
+      const file = await database.query.files.findFirst({
+        where: eq(files.id, id),
+      });
+
+      if (!file) return null;
+
+      // Check if file belongs to a KB that is shared with this user
+      const kbFile = await database.query.knowledgeBaseFiles.findFirst({
+        where: eq(knowledgeBaseFiles.fileId, id),
+      });
+
+      if (kbFile) {
+        const { KnowledgeBaseSharingModel } = await import('./knowledgeBaseSharing');
+        const sharingModel = new KnowledgeBaseSharingModel(this.db, this.userId);
+        const accessibleKBIds = await sharingModel.getAccessibleKnowledgeBaseIds();
+
+        // Allow if KB is accessible (owned or shared)
+        if (accessibleKBIds.includes(kbFile.knowledgeBaseId)) {
+          return file;
+        }
+      }
+
+      // Check if file is owned by user
+      if (file.userId === this.userId) {
+        return file;
+      }
+
+      return null;
+    }
+
     return database.query.files.findFirst({
       where: and(eq(files.id, id), eq(files.userId, this.userId)),
     });

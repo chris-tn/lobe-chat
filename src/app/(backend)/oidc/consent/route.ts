@@ -132,6 +132,7 @@ export async function POST(request: NextRequest) {
     // Fallback: use original internal URL
     log('Using internal redirect URL directly: %s', internalRedirectUrlString);
     return NextResponse.redirect(new URL(internalRedirectUrlString), {
+    return NextResponse.redirect(finalRedirectUrl, {
       status: 303,
     });
   } catch (error) {

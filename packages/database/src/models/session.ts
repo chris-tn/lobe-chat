@@ -328,6 +328,36 @@ export class SessionModel {
     });
   };
 
+  /**
+   * Create a session for an existing agent (for shared agents)
+   */
+  createSessionForExistingAgent = async (agentId: string): Promise<SessionItem> => {
+    const sessionId = idGenerator('sessions');
+
+    return this.db.transaction(async (trx) => {
+      // Create session
+      const [session] = await trx
+        .insert(sessions)
+        .values({
+          createdAt: new Date(),
+          id: sessionId,
+          type: 'agent',
+          updatedAt: new Date(),
+          userId: this.userId,
+        })
+        .returning();
+
+      // Link to existing agent
+      await trx.insert(agentsToSessions).values({
+        agentId,
+        sessionId,
+        userId: this.userId,
+      });
+
+      return session;
+    });
+  };
+
   createInbox = async (defaultAgentConfig: PartialDeep<LobeAgentConfig>) => {
     const item = await this.db.query.sessions.findFirst({
       where: and(eq(sessions.userId, this.userId), eq(sessions.slug, INBOX_SESSION_ID)),
@@ -506,6 +536,22 @@ export class SessionModel {
     }
 
     // First process the params field: undefined means delete, null means disable flag
+    // Check if the agent belongs to this user (prevent editing shared agents)
+    // Only admins can create agents, so only admins should be able to edit them
+    const agent = await this.db.query.agents.findFirst({
+      columns: { userId: true },
+      where: eq(agents.id, session.agent.id),
+    });
+
+    if (!agent) {
+      throw new Error('Agent not found.');
+    }
+
+    if (agent.userId !== this.userId) {
+      throw new Error('You do not have permission to edit this agent (shared agent).');
+    }
+
+    // 先处理参数字段：undefined 表示删除，null 表示禁用标记
     const existingParams = session.agent.params ?? {};
     const updatedParams: Record<string, any> = { ...existingParams };
 

@@ -303,6 +303,8 @@ const AgentModal = memo(() => {
         children: (
           <SelectWithCheckbox
             checked={typeof reasoningEffortValue === 'string'}
+          <Select
+            defaultValue="minimal"
             options={[
               { label: t('settingModel.reasoningEffort.options.low'), value: 'low' },
               { label: t('settingModel.reasoningEffort.options.medium'), value: 'medium' },

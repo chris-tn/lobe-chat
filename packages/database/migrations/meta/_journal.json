@@ -291,15 +291,15 @@
     {
       "idx": 41,
       "version": "7",
-      "when": 1761878697451,
-      "tag": "0041_improve_index",
+      "when": 1762178201314,
+      "tag": "0041_lively_timeslip",
       "breakpoints": true
     },
     {
       "idx": 42,
       "version": "7",
-      "when": 1762232313711,
-      "tag": "0042_improve_agent_index",
+      "when": 1762244076679,
+      "tag": "0042_productive_monster_badoon",
       "breakpoints": true
     },
     {
@@ -620,8 +620,22 @@
     {
       "idx": 88,
       "version": "7",
-      "when": 1772277762014,
-      "tag": "0088_fix_benchmark_add_bot_provider",
+      "when": 1763713084000,
+      "tag": "0088_add_integrations",
+      "breakpoints": true
+    },
+    {
+      "idx": 89,
+      "version": "7",
+      "when": 1771386091928,
+      "tag": "0089_add_client_session_to_sessions",
+      "breakpoints": true
+    },
+    {
+      "idx": 90,
+      "version": "7",
+      "when": 1771386092928,
+      "tag": "0090_fix_benchmark_add_bot_provider",
       "breakpoints": true
     }
   ],

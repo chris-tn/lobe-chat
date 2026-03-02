@@ -28,27 +28,33 @@ We’re building the world’s largest human–agent co-evolving network.
 [![][sponsor-shield]][sponsor-link]
 
 **Share LobeHub Repository**
+# DxAi
 
-[![][share-x-shield]][share-x-link]
-[![][share-telegram-shield]][share-telegram-link]
-[![][share-whatsapp-shield]][share-whatsapp-link]
-[![][share-reddit-shield]][share-reddit-link]
-[![][share-weibo-shield]][share-weibo-link]
-[![][share-mastodon-shield]][share-mastodon-link]
-[![][share-linkedin-shield]][share-linkedin-link]
+A custom AI assistant platform based on LobeChat Community Edition. DxAi provides a streamlined AI chat experience with predefined assistants and enterprise-ready features.
 
 <sup>Agent teammates that grow with you</sup>
 
 [![][github-trending-shield]][github-trending-url]
 
 [![](https://vercel.com/oss/program-badge.svg)](https://vercel.com/oss)
+## Features
 
-</div>
+- **OpenAI Integration**: Seamless integration with OpenAI's GPT models
+- **Predefined Assistants**: Ready-to-use AI assistants for common tasks
+- **Knowledge Base**: File upload and document processing capabilities
+- **Voice Features**: Text-to-Speech (TTS) and Speech-to-Text (STT) support
+- **Secure Configuration**: API keys configured via environment variables only
+- **Enterprise Ready**: Simplified interface without unnecessary configuration options
 
-<details>
-<summary><kbd>Table of contents</kbd></summary>
+## Quick Start
 
-#### TOC
+### Prerequisites
+
+- Node.js 18+
+- OpenAI API Key
+- PostgreSQL database (for production)
+
+### Environment Setup
 
 - [👋🏻 Getting Started & Join Our Community](#-getting-started--join-our-community)
 - [✨ Features](#-features)
@@ -561,64 +567,94 @@ Beside these features, LobeHub also have much better basic technique underground
 </details>
 
 > ✨ more features will be added when LobeHub evolve.
+1. Copy the environment configuration:
 
-<div align="right">
+```bash
+cp env.example .env.local
+```
 
-[![][back-to-top]](#readme-top)
+2. Configure your OpenAI API key:
 
-</div>
+```bash
+# Edit .env.local
+OPENAI_API_KEY=sk-your-openai-api-key-here
+DATABASE_URL=postgresql://username:password@localhost:5432/dxai
+```
 
-## 🛳 Self Hosting
+### Installation
+
+```bash
+# Install dependencies
+npm install
 
 LobeHub provides Self-Hosted Version with Vercel, Alibaba Cloud, and [Docker Image][docker-release-link]. This allows you to deploy your own chatbot within a few minutes without any prior knowledge.
 
 > \[!TIP]
 >
 > Learn more about [📘 Build your own LobeHub][docs-self-hosting] by checking it out.
+# Run database migrations
+npm run db:migrate
 
-### `A` Deploying with Vercel, Zeabur , Sealos or Alibaba Cloud
+# Import predefined assistants
+npm run import-assistants
 
-"If you want to deploy this service yourself on Vercel, Zeabur or Alibaba Cloud, you can follow these steps:
+# Start development server
+npm run dev
+```
+
+## Deployment
 
 - Prepare your [OpenAI API Key](https://platform.openai.com/account/api-keys).
 - Click the button below to start deployment: Log in directly with your GitHub account, and remember to fill in the `OPENAI_API_KEY`(required) on the environment variable section.
 - After deployment, you can start using it.
 - Bind a custom domain (optional): The DNS of the domain assigned by Vercel is polluted in some areas; binding a custom domain can connect directly.
+### Docker Deployment
 
-<div align="center">
+```bash
+# Set environment variables
+export OPENAI_API_KEY=sk-your-openai-api-key-here
+export DATABASE_URL=postgresql://username:password@host:port/database
 
-|           Deploy with Vercel            |                     Deploy with Zeabur                      |                     Deploy with Sealos                      |                       Deploy with RepoCloud                       |                         Deploy with Alibaba Cloud                         |
-| :-------------------------------------: | :---------------------------------------------------------: | :---------------------------------------------------------: | :---------------------------------------------------------------: | :-----------------------------------------------------------------------: |
-| [![][deploy-button-image]][deploy-link] | [![][deploy-on-zeabur-button-image]][deploy-on-zeabur-link] | [![][deploy-on-sealos-button-image]][deploy-on-sealos-link] | [![][deploy-on-repocloud-button-image]][deploy-on-repocloud-link] | [![][deploy-on-alibaba-cloud-button-image]][deploy-on-alibaba-cloud-link] |
+# Start with Docker Compose
+docker-compose up -d
+```
 
-</div>
+### Vercel Deployment
 
-#### After Fork
+1. Fork this repository
+2. Connect to Vercel
+3. Add environment variables:
+   - `OPENAI_API_KEY`: Your OpenAI API key
+   - `DATABASE_URL`: Your PostgreSQL database URL
+4. Deploy
 
-After fork, only retain the upstream sync action and disable other actions in your repository on GitHub.
+## Configuration
 
-#### Keep Updated
+### Environment Variables
 
-If you have deployed your own project following the one-click deployment steps in the README, you might encounter constant prompts indicating "updates available." This is because Vercel defaults to creating a new project instead of forking this one, resulting in an inability to detect updates accurately.
+| Variable         | Required | Description                           |
+| ---------------- | -------- | ------------------------------------- |
+| `OPENAI_API_KEY` | Yes      | OpenAI API key for AI functionality   |
+| `DATABASE_URL`   | Yes      | PostgreSQL database connection string |
+| `ACCESS_CODE`    | No       | Password to protect your instance     |
+| `APP_NAME`       | No       | Application name (default: DxAi)      |
+| `APP_URL`        | No       | Application URL for absolute links    |
 
-> \[!TIP]
->
-> We suggest you redeploy using the following steps, [📘 Auto Sync With Latest][docs-upstream-sync]
+### Predefined Assistants
 
-<br/>
+DxAi comes with three predefined assistants:
 
-### `B` Deploying with Docker
+1. **General Assistant** 🤖 - Versatile AI for everyday tasks
+2. **Code Assistant** 💻 - Expert programming helper
+3. **Writing Assistant** ✍️ - Professional writing and content creation
 
-[![][docker-release-shield]][docker-release-link]
-[![][docker-size-shield]][docker-size-link]
-[![][docker-pulls-shield]][docker-pulls-link]
+To customize assistants, edit `config/sample-assistants.json` and run the import script.
 
 We provide a Docker image for deploying the LobeHub service on your own private device. Use the following command to start the LobeHub service:
+## Development
 
-1. create a folder to for storage files
+### Project Structure
 
-```fish
-$ mkdir lobe-chat-db && cd lobe-chat-db
 ```
 
 2. init the LobeHub infrastructure
@@ -628,9 +664,32 @@ bash <(curl -fsSL https://lobe.li/setup.sh)
 ```
 
 3. Start the LobeHub service
+src/
+├── app/                    # Next.js app router
+├── components/             # React components
+├── config/                # Configuration files
+├── features/              # Feature modules
+├── store/                 # State management
+└── styles/                # Styling
 
-```fish
-docker compose up -d
+config/
+├── sample-assistants.json # Predefined assistants
+└── featureFlags/          # Feature configuration
+
+scripts/
+└── importAssistants.ts    # Assistant import script
+```
+
+### Available Scripts
+
+```bash
+npm run dev               # Start development server
+npm run build             # Build for production
+npm run start             # Start production server
+npm run db:migrate        # Run database migrations
+npm run import-assistants # Import predefined assistants
+npm run type-check        # TypeScript type checking
+npm run lint              # Run linting
 ```
 
 > \[!NOTE]
@@ -652,27 +711,29 @@ This project provides some additional configuration items set with environment v
 > \[!NOTE]
 >
 > The complete list of environment variables can be found in the [📘 Environment Variables][docs-env-var]
+## Customization
 
-<div align="right">
+### Adding New Assistants
 
-[![][back-to-top]](#readme-top)
+1. Edit `config/sample-assistants.json`
+2. Add your assistant configuration
+3. Run `npm run import-assistants`
 
-</div>
+### Branding
 
-## 📦 Ecosystem
+Update branding in `packages/const/src/branding.ts`:
 
-| NPM                               | Repository                              | Description                                                                                           | Version                                   |
-| --------------------------------- | --------------------------------------- | ----------------------------------------------------------------------------------------------------- | ----------------------------------------- |
-| [@lobehub/ui][lobe-ui-link]       | [lobehub/lobe-ui][lobe-ui-github]       | Open-source UI component library dedicated to building AIGC web applications.                         | [![][lobe-ui-shield]][lobe-ui-link]       |
-| [@lobehub/icons][lobe-icons-link] | [lobehub/lobe-icons][lobe-icons-github] | Popular AI / LLM Model Brand SVG Logo and Icon Collection.                                            | [![][lobe-icons-shield]][lobe-icons-link] |
-| [@lobehub/tts][lobe-tts-link]     | [lobehub/lobe-tts][lobe-tts-github]     | High-quality & reliable TTS/STT React Hooks library                                                   | [![][lobe-tts-shield]][lobe-tts-link]     |
-| [@lobehub/lint][lobe-lint-link]   | [lobehub/lobe-lint][lobe-lint-github]   | Configurations for ESlint, Stylelint, Commitlint, Prettier, Remark, and Semantic Release for LobeHub. | [![][lobe-lint-shield]][lobe-lint-link]   |
+- `BRANDING_NAME`: Application name
+- `BRANDING_EMAIL`: Contact emails
+- `BRANDING_LOGO_URL`: Logo URL (when available)
 
-<div align="right">
+### Feature Flags
 
-[![][back-to-top]](#readme-top)
+Control features in `src/config/featureFlags/schema.ts`:
 
-</div>
+- `knowledge_base`: Enable/disable knowledge base
+- `speech_to_text`: Enable/disable TTS/STT
+- `dalle`: Enable/disable image generation
 
 ## 🧩 Plugins
 
@@ -711,18 +772,23 @@ $ cd lobe-chat
 $ pnpm install
 $ pnpm dev
 ```
+## Security
 
-If you would like to learn more details, please feel free to look at our [📘 Development Guide][docs-dev-guide].
+- API keys are only configurable via environment variables
+- No user-facing configuration interfaces for sensitive settings
+- Access code protection available
+- All external links to LobeHub removed
 
-<div align="right">
+## Support
 
-[![][back-to-top]](#readme-top)
+For support and questions:
 
-</div>
+- Email: <support@dxai.com>
+- Documentation: \[Add your documentation URL]
 
-## 🤝 Contributing
+## License
 
-Contributions of all types are more than welcome; if you are interested in contributing code, feel free to check out our GitHub [Issues][github-issues-link] and [Projects][github-project-link] to get stuck in to show us what you're made of.
+MIT License - See LICENSE file for details.
 
 > \[!TIP]
 >
@@ -961,3 +1027,6 @@ This project is [LobeHub Community License](./LICENSE) licensed.
 [submit-plugin-shield]: https://img.shields.io/badge/🧩/🏪_submit_plugin-%E2%86%92-95f3d9?labelColor=black&style=for-the-badge
 [vercel-link]: https://app.lobehub.com
 [vercel-shield]: https://img.shields.io/badge/vercel-online-55b467?labelColor=black&logo=vercel&style=flat-square
+## Acknowledgments
+
+Built on top of [LobeChat Community Edition](https://github.com/lobehub/lobe-chat) - an excellent open-source AI chat framework.

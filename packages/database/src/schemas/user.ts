@@ -31,6 +31,10 @@ export const users = pgTable(
     emailVerified: boolean('email_verified').default(false).notNull(),
     // Required by nextauth, all null allowed
     emailVerifiedAt: timestamptz('email_verified_at'),
+  isOnboarded: boolean('is_onboarded').default(false),
+  isAdmin: boolean('is_admin').default(false),
+  // Time user was created in Clerk
+  clerkCreatedAt: timestamptz('clerk_created_at'),
 
     preference: jsonb('preference').$defaultFn(() => DEFAULT_PREFERENCE),
 

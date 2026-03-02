@@ -3,12 +3,16 @@ import { type TabBarProps } from '@lobehub/ui/mobile';
 import { TabBar } from '@lobehub/ui/mobile';
 import { createStaticStyles, cssVar } from 'antd-style';
 import { Bot, MessageSquare, User } from 'lucide-react';
+import { TabBar, type TabBarProps } from '@lobehub/ui/mobile';
+import { createStyles } from 'antd-style';
+import { MessageSquare } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { rgba } from 'polished';
 import { memo, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useRouter } from '@/libs/router/navigation';
 import { SidebarTabKey } from '@/store/global/initialState';
-import { featureFlagsSelectors, useServerConfigStore } from '@/store/serverConfig';
 
 const styles = createStaticStyles(({ css }) => ({
   active: css`
@@ -62,8 +66,10 @@ export default memo<Props>(({ className, tabBarKey }) => {
           onClick: openSettings,
           title: t('tab.setting'),
         },
+        // Hide discover/market tab for DxAi
+        // Hide settings tab for DxAi - users cannot configure settings
       ].filter(Boolean) as TabBarProps['items'],
-    [t],
+    [t, router, styles],
   );
 
   return <TabBar safeArea activeKey={tabBarKey} className={className} items={items} />;

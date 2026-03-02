@@ -292,6 +292,17 @@ export class UserModel {
     return db.query.users.findFirst({ where: eq(users.email, email) });
   };
 
+  static getAllUsers = async (db: LobeChatDatabase) => {
+    return db.query.users.findMany({
+      columns: {
+        avatar: true,
+        email: true,
+        fullName: true,
+        id: true,
+      },
+    });
+  };
+
   static getUserApiKeys = async (
     db: LobeChatDatabase,
     id: string,

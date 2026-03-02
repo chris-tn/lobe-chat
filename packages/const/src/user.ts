@@ -16,6 +16,7 @@ export const DEFAULT_PREFERENCE: UserPreference = {
   lab: {
     enableInputMarkdown: true,
   },
+  telemetry: false, // Disabled by default
   topicDisplayMode: TopicDisplayMode.ByTime,
   useCmdEnterToSend: false,
 };

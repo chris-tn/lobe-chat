@@ -48,6 +48,24 @@ const userProcedure = authedProcedure.use(serverDatabase).use(async ({ ctx, next
 });
 
 export const userRouter = router({
+  /**
+   * Get list of all users (for sharing dropdowns)
+   * Returns basic user info without sensitive data
+   */
+  getUserList: userProcedure.query(async ({ ctx }) => {
+    const users = await UserModel.getAllUsers(ctx.serverDB);
+
+    // Filter out current user and return only necessary fields
+    return users
+      .filter((u) => u.id !== ctx.userId)
+      .map((user) => ({
+        avatar: user.avatar,
+        email: user.email ?? '',
+        fullName: user.fullName ?? user.email ?? 'Unknown User',
+        id: user.id,
+      }));
+  }),
+
   getUserRegistrationDuration: userProcedure.query(async ({ ctx }) => {
     return ctx.userModel.getUserRegistrationDuration();
   }),
@@ -237,5 +255,4 @@ export const userRouter = router({
     return ctx.userModel.updateUser({ username });
   }),
 });
-
 export type UserRouter = typeof userRouter;
