@@ -34,10 +34,14 @@ const ASSISTANT_INDEX_URL = 'https://registry.npmmirror.com/@lobehub/agents-inde
 
 const PLUGINS_INDEX_URL = 'https://registry.npmmirror.com/@lobehub/plugins-index/v1/files/public';
 
+const ROCKETCHAT_TEAMS_URL = 'https://teams.dxai.vn';
+
 export const getAppConfig = () => {
   return createEnv({
     client: {
       NEXT_PUBLIC_ENABLE_SENTRY: z.boolean(),
+      NEXT_PUBLIC_ROCKETCHAT_TEAMS_URL: z.string().url().optional(),
+      NEXT_PUBLIC_CUSTOM_TABS: z.string().optional(),
     },
     server: {
       AGENTS_INDEX_URL: z.string().url(),
@@ -87,6 +91,12 @@ export const getAppConfig = () => {
     runtimeEnv: {
       // Sentry
       NEXT_PUBLIC_ENABLE_SENTRY: !!process.env.NEXT_PUBLIC_SENTRY_DSN,
+
+      NEXT_PUBLIC_ROCKETCHAT_TEAMS_URL: process.env.NEXT_PUBLIC_ROCKETCHAT_TEAMS_URL || ROCKETCHAT_TEAMS_URL,
+
+      NEXT_PUBLIC_CUSTOM_TABS: process.env.NEXT_PUBLIC_CUSTOM_TABS,
+
+      ACCESS_CODES: ACCESS_CODES as any,
 
       AGENTS_INDEX_URL: !!process.env.AGENTS_INDEX_URL
         ? process.env.AGENTS_INDEX_URL

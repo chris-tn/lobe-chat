@@ -14,6 +14,7 @@ import { useTranslation } from 'react-i18next';
 import PluginAvatar from '@/components/Plugins/PluginAvatar';
 import { useCheckPluginsIsInstalled } from '@/hooks/useCheckPluginsIsInstalled';
 import { useFetchInstalledPlugins } from '@/hooks/useFetchInstalledPlugins';
+import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { useAgentStore } from '@/store/agent';
 import { agentByIdSelectors } from '@/store/agent/selectors';
 import { serverConfigSelectors, useServerConfigStore } from '@/store/serverConfig';
@@ -37,6 +38,7 @@ const SKILL_ICON_SIZE = 20;
 export const useControls = ({ setUpdating }: { setUpdating: (updating: boolean) => void }) => {
   const { t } = useTranslation('setting');
   const agentId = useAgentId();
+  const isAdmin = useIsAdmin();
   const list = useToolStore(pluginSelectors.installedPluginMetaList, isEqual);
   const [checked, togglePlugin] = useAgentStore((s) => [
     agentByIdSelectors.getAgentPluginsById(agentId)(s),
@@ -395,6 +397,34 @@ export const useControls = ({ setUpdating }: { setUpdating: (updating: boolean) 
           />
         ),
       }));
+      })),
+      key: 'plugins',
+      label: (
+        <Flexbox align={'center'} gap={40} horizontal justify={'space-between'}>
+          {t('tools.plugins.groupName')}
+          {enablePluginCount === 0 ? null : (
+            <div style={{ fontSize: 12, marginInlineEnd: 4 }}>
+              {t('tools.plugins.enabled', { num: enablePluginCount })}
+            </div>
+          )}
+        </Flexbox>
+      ),
+      type: 'group',
+    },
+    {
+      type: 'divider',
+    },
+    {
+      extra: <Icon icon={ArrowRight} />,
+      icon: Store,
+      key: 'plugin-store',
+      label: t('tools.plugins.store'),
+      onClick: () => {
+        if (!isAdmin) return;
+        setModalOpen(true);
+      },
+    },
+  ];
 
     // 已启用的自定义插件
     const enabledCustomPlugins = customPlugins

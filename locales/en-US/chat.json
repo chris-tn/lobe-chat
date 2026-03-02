@@ -137,6 +137,26 @@
   "input.warp": "New Line",
   "input.warpWithKey": "Press <key/> to insert a line break",
   "intentUnderstanding.title": "Understanding your intent...",
+  "inbox": {
+    "desc": "Activate the brain cluster and spark creative thinking. Your virtual assistant is here to communicate with you about everything.",
+    "title": "Dxai Chat"
+  },
+  "input": {
+    "addAi": "Add an AI message",
+    "addUser": "Add a user message",
+    "disclaimer": "AI may also make mistakes, please verify important information",
+    "errorMsg": "Message sending failed, please check your network and try again: {{errorMsg}}",
+    "more": "more",
+    "send": "Send",
+    "sendWithCmdEnter": "Press <key/> to send",
+    "sendWithEnter": "Press <key/> to send",
+    "stop": "Stop",
+    "warp": "New Line",
+    "warpWithKey": "Press <key/> to insert a line break"
+  },
+  "intentUnderstanding": {
+    "title": "Understanding and analyzing your intent..."
+  },
   "inviteMembers": "Invite members",
   "knowledgeBase.all": "All Content",
   "knowledgeBase.allFiles": "All Files",

@@ -75,16 +75,13 @@ const Actions = memo<ActionsProps>(
     };
 
     const newGroupChatItem: MenuItemType = {
-      disabled: !isAdmin,
       icon: <Icon icon={UsersRound} />,
       key: 'newGroupChat',
       label: t('newGroupChat'),
       onClick: ({ domEvent }) => {
-        if (!isAdmin) return;
         domEvent.stopPropagation();
         setIsGroupModalOpen(true);
       },
-      title: !isAdmin ? t('onlyAdminCanCreate') : undefined,
     };
 
     const handleCreateGroupWithMembers = async (

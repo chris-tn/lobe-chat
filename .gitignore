@@ -1,6 +1,5 @@
 # Gitignore for LobeHub
 ################################################################
-data
 s3_data
 market-api
 # System files
@@ -131,3 +130,6 @@ i18n-unused-keys-report.json
 .vitest-reports
 
 pnpm-lock.yaml
+
+s3_data/
+data/

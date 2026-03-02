@@ -5,6 +5,13 @@ import { memo, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { ChatItem } from '@/features/Conversation/ChatItem';
+import Avatar from '@/features/ChatItem/components/Avatar';
+import BorderSpacing from '@/features/ChatItem/components/BorderSpacing';
+import MessageContent from '@/features/ChatItem/components/MessageContent';
+import Title from '@/features/ChatItem/components/Title';
+import { useStyles } from '@/features/ChatItem/style';
+import { getMarkdownElements } from '@/features/Conversation/MarkdownElements';
+import { useEnableChartDisplay } from '@/hooks/useEnableChartDisplay';
 import { useUserAvatar } from '@/hooks/useUserAvatar';
 import { useSessionStore } from '@/store/session';
 import { sessionSelectors } from '@/store/session/selectors';
@@ -31,6 +38,21 @@ const UserMessage = memo<UserMessageProps>(({ id, disableEditing, index }) => {
   const item = useConversationStore(dataSelectors.getDisplayMessageById(id), isEqual)!;
   const actionsConfig = useConversationStore((s) => s.actionsBar?.user);
   const { content, createdAt, error, role, extra, targetId } = item;
+const getRehypePlugins = () =>
+  getMarkdownElements()
+    .filter((s) => s.scope !== 'assistant')
+    .map((element) => element.rehypePlugin)
+    .filter(Boolean);
+
+const getRemarkPlugins = () =>
+  getMarkdownElements()
+    .filter((s) => s.scope !== 'assistant')
+    .map((element) => element.remarkPlugin)
+    .filter(Boolean);
+
+const UserMessage = memo<UserMessageProps>((props) => {
+  const { id, ragQuery, content, createdAt, error, role, index, extra, disableEditing, targetId } =
+    props;
 
   const { t } = useTranslation('chat');
   const avatar = useUserAvatar();
@@ -75,6 +97,42 @@ const UserMessage = memo<UserMessageProps>(({ id, disableEditing, index }) => {
       setMessageItemActionElementPortialContext,
       setMessageItemActionTypeContext,
     ],
+  const onDoubleClick = useDoubleClickEdit({ disableEditing, error, id, index, role });
+
+  const renderMessage = useCallback(
+    (editableContent: ReactNode) => (
+      <UserMessageContent {...props} editableContent={editableContent} />
+    ),
+    [props],
+  );
+
+  const enableChartDisplay = useEnableChartDisplay();
+
+  const components = useMemo(
+    () =>
+      Object.fromEntries(
+        getMarkdownElements().map((element) => {
+          const Component = element.Component;
+
+          return [element.tag, (props: any) => <Component {...props} id={id} />];
+        }),
+      ),
+    [id, enableChartDisplay],
+  );
+
+  const rehypePlugins = useMemo(() => getRehypePlugins(), [enableChartDisplay]);
+  const remarkPlugins = useMemo(() => getRemarkPlugins(), [enableChartDisplay]);
+
+  const markdownProps = useMemo(
+    () => ({
+      components,
+      customRender: (dom: ReactNode, { text }: { text: string }) => (
+        <UserMarkdownRender displayMode={displayMode} dom={dom} id={id} text={text} />
+      ),
+      rehypePlugins,
+      remarkPlugins,
+    }),
+    [displayMode],
   );
 
   return (

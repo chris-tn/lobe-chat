@@ -19,12 +19,12 @@ const { NEXT_PUBLIC_ENABLED_SERVER_SERVICE } = getServerDBConfig();
 export const initSSOProviders = () => {
   return NEXT_PUBLIC_ENABLE_NEXT_AUTH
     ? NEXT_AUTH_SSO_PROVIDERS.split(/[,，]/).map((provider) => {
-        const validProvider = ssoProviders.find((item) => item.id === provider.trim());
+      const validProvider = ssoProviders.find((item) => item.id === provider.trim());
 
-        if (validProvider) return validProvider.provider;
+      if (validProvider) return validProvider.provider;
 
-        throw new Error(`[NextAuth] provider ${provider} is not supported`);
-      })
+      throw new Error(`[NextAuth] provider ${provider} is not supported`);
+    })
     : [];
 };
 
@@ -33,14 +33,14 @@ export default {
   adapter: NEXT_PUBLIC_ENABLED_SERVER_SERVICE ? LobeNextAuthDbAdapter() : undefined,
   callbacks: {
     // Note: Data processing order of callback: authorize --> jwt --> session
-    async jwt({ token, user, account, profile }) {
+    async jwt({ token, user, profile }) {
       // Debug: Log JWT payload to see what Casdoor returns
-      console.log('=== [JWT Callback] ===');
-      console.log('token:', token);
-      console.log('user:', user);
-      console.log('account:', account);
-      console.log('profile:', profile);
-      console.log('=====================');
+      // console.log('=== [JWT Callback] ===');
+      // console.log('token:', token);
+      // console.log('user:', user);
+      // console.log('account:', account);
+      // console.log('profile:', profile);
+      // console.log('=====================');
 
       // ref: https://authjs.dev/guides/extending-the-session#with-jwt
       if (user?.id) {
@@ -61,19 +61,19 @@ export default {
               profileData.roles.some((r: any) => r.name === 'admin'))
           ) {
             isAdmin = true;
-            console.log('[JWT Callback] isAdmin from profile:', isAdmin);
+            //console.log('[JWT Callback] isAdmin from profile:', isAdmin);
           }
         }
 
         // Priority 2: From user object (processed by profile callback)
         if (!isAdmin && user && 'isAdmin' in user) {
           isAdmin = user.isAdmin as boolean;
-          console.log('[JWT Callback] isAdmin from user:', isAdmin);
+          //console.log('[JWT Callback] isAdmin from user:', isAdmin);
         }
       } else {
         // For SUBSEQUENT requests (only token exists) - preserve existing token value
         isAdmin = token.isAdmin === true;
-        console.log('[JWT Callback] isAdmin from token (subsequent request):', isAdmin);
+        //console.log('[JWT Callback] isAdmin from token (subsequent request):', isAdmin);
       }
 
       console.log('[JWT Callback] Final isAdmin:', isAdmin);

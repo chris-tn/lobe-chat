@@ -137,6 +137,26 @@
   "input.warp": "Dòng mới",
   "input.warpWithKey": "Nhấn <key/> để xuống dòng",
   "intentUnderstanding.title": "Đang hiểu ý định của bạn...",
+  "inbox": {
+    "desc": "Kích hoạt cụm não, khơi dậy tia lửa tư duy. Trợ lý thông minh của bạn, ở đây để trò chuyện với bạn về mọi thứ.",
+    "title": "Dxai Chat"
+  },
+  "input": {
+    "addAi": "Thêm một tin nhắn AI",
+    "addUser": "Thêm một tin nhắn người dùng",
+    "disclaimer": "AI cũng có thể mắc lỗi, vui lòng kiểm tra kỹ thông tin quan trọng",
+    "errorMsg": "Gửi tin nhắn thất bại, vui lòng kiểm tra mạng và thử lại: {{errorMsg}}",
+    "more": "Thêm",
+    "send": "Gửi",
+    "sendWithCmdEnter": "Nhấn <key/> để gửi",
+    "sendWithEnter": "Nhấn <key/> để gửi",
+    "stop": "Dừng",
+    "warp": "Xuống dòng",
+    "warpWithKey": "Nhấn phím <key/> để xuống dòng"
+  },
+  "intentUnderstanding": {
+    "title": "Đang hiểu và phân tích ý định của bạn..."
+  },
   "inviteMembers": "Mời thành viên",
   "knowledgeBase.all": "Tất cả nội dung",
   "knowledgeBase.allFiles": "Tất cả tệp",

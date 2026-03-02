@@ -12,6 +12,9 @@ import { useNewScreen } from '@/features/Conversation/Messages/components/useNew
 import ErrorMessageExtra, { useErrorContent } from '../../Error';
 import { useAgentMeta, useDoubleClickEdit } from '../../hooks';
 import { dataSelectors, messageStateSelectors, useConversationStore } from '../../store';
+import { getMarkdownElements } from '../../MarkdownElements';
+import { useEnableChartDisplay } from '@/hooks/useEnableChartDisplay';
+import { useDoubleClickEdit } from '../../hooks/useDoubleClickEdit';
 import { normalizeThinkTags, processWithArtifact } from '../../utils/markdown';
 import MessageBranch from '../components/MessageBranch';
 import {
@@ -24,6 +27,16 @@ import { AssistantMessageExtra } from './Extra';
 const actionBarHolder = (
   <div {...{ [MESSAGE_ACTION_BAR_PORTAL_ATTRIBUTES.assistant]: '' }} style={{ height: '28px' }} />
 );
+// Note: Plugins are created at module level, so they include all elements
+// Feature flag check happens in component rendering
+const getRehypePlugins = () =>
+  getMarkdownElements()
+    .map((element) => element.rehypePlugin)
+    .filter(Boolean);
+const getRemarkPlugins = () =>
+  getMarkdownElements()
+    .map((element) => element.remarkPlugin)
+    .filter(Boolean);
 
 interface AssistantMessageProps {
   disableEditing?: boolean;
@@ -82,6 +95,82 @@ const AssistantMessage = memo<AssistantMessageProps>(
       },
       [id, index, setMessageItemActionElementPortialContext, setMessageItemActionTypeContext],
     );
+  const reducted =
+    isGroupSession && targetId !== null && targetId !== 'user' && !groupConfig?.revealDM;
+
+  // Get target name for DM indicator
+  const userName = useUserStore(userProfileSelectors.nickName) || 'User';
+  const agents = useSessionStore(sessionSelectors.currentGroupAgents);
+
+  const dmIndicator = useMemo(() => {
+    if (!targetId) return undefined;
+
+    let targetName = targetId;
+    if (targetId === 'user') {
+      targetName = t('dm.you');
+    } else {
+      const targetAgent = agents?.find((agent) => agent.id === targetId);
+      targetName = targetAgent?.title || targetId;
+    }
+
+    return <Tag>{t('dm.visibleTo', { target: targetName })}</Tag>;
+  }, [targetId, userName, agents, t]);
+
+  // ======================= Performance Optimization ======================= //
+  // these useMemo/useCallback are all for the performance optimization
+  // maybe we can remove it in React 19
+  // ======================================================================== //
+
+  const enableChartDisplay = useEnableChartDisplay();
+
+  const components = useMemo(
+    () =>
+      Object.fromEntries(
+        getMarkdownElements().map((element) => {
+          const Component = element.Component;
+
+          return [element.tag, (props: any) => <Component {...props} id={id} />];
+        }),
+      ),
+    [id, enableChartDisplay],
+  );
+
+  const rehypePlugins = useMemo(() => getRehypePlugins(), [enableChartDisplay]);
+  const remarkPlugins = useMemo(() => getRemarkPlugins(), [enableChartDisplay]);
+
+  const markdownProps = useMemo(
+    () => ({
+      animated,
+      citations: search?.citations,
+      componentProps: {
+        highlight: {
+          actionsRender: ({ content, actionIconSize, language, originalNode }: any) => {
+            const showHtmlPreview = isHtmlCode(content, language);
+
+            return (
+              <>
+                {showHtmlPreview && <HtmlPreviewAction content={content} size={actionIconSize} />}
+                {originalNode}
+              </>
+            );
+          },
+          theme: highlighterTheme,
+        },
+        mermaid: { theme: mermaidTheme },
+      },
+      components,
+      enableCustomFootnotes: true,
+      rehypePlugins,
+      remarkPlugins,
+      showFootnotes:
+        search?.citations &&
+        // if the citations are all empty, we should not show the citations
+        search?.citations.length > 0 &&
+        // if the citations's url and title are all the same, we should not show the citations
+        search?.citations.every((item) => item.title !== item.url),
+    }),
+    [animated, components, role, search, highlighterTheme, mermaidTheme, rehypePlugins, remarkPlugins],
+  );
 
     return (
       <ChatItem

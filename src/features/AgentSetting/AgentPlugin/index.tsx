@@ -162,6 +162,8 @@ const AgentPlugin = memo(() => {
                 e.preventDefault();
                 handleOpenStore();
                 navigate('/community/mcp');
+                if (!isAdmin) return;
+                setShowStore(true);
               }}
             >
               前往插件市场

@@ -32,6 +32,10 @@ export const FeatureFlagsSchema = z.object({
   // internal flag
   cloud_promotion: FeatureFlagValue.optional(),
 
+  group_chat: FeatureFlagValue.optional(),
+
+  chart_display: FeatureFlagValue.optional(),
+
   // the flags below can only be used with commercial license
   // if you want to use it in the commercial usage
   // please contact us for more information: hello@lobehub.com
@@ -134,6 +138,8 @@ export const mapFeatureFlagsEnvToState = (config: IFeatureFlags, userId?: string
 
     showMarket: evaluateFeatureFlag(config.market, userId),
     enableSTT: evaluateFeatureFlag(config.speech_to_text, userId),
+
+    enableChartDisplay: evaluateFeatureFlag(config.chart_display, userId),
 
     hideGitHub: evaluateFeatureFlag(config.commercial_hide_github, userId),
     hideDocs: evaluateFeatureFlag(config.commercial_hide_docs, userId),

@@ -16,7 +16,6 @@ import { ArtifactsManifest } from './artifacts';
 
 export const builtinTools: LobeBuiltinTool[] = [
   {
-    hidden: true,
     identifier: ArtifactsManifest.identifier,
     manifest: ArtifactsManifest,
     type: 'builtin',

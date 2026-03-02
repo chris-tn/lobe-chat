@@ -101,6 +101,15 @@ declare global {
        * @default '30s'
        */
       INTERNAL_JWT_EXPIRATION?: string;
+      // ZITADEL
+      ZITADEL_CLIENT_ID?: string;
+      ZITADEL_CLIENT_SECRET?: string;
+      ZITADEL_ISSUER?: string;
+
+      // KEYCLOAK
+      AUTH_KEYCLOAK_ID?: string;
+      AUTH_KEYCLOAK_SECRET?: string;
+      AUTH_KEYCLOAK_ISSUER?: string;
     }
   }
 }
@@ -108,6 +117,22 @@ declare global {
 export const getAuthConfig = () => {
   return createEnv({
     client: {},
+    client: {
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: z.string().optional(),
+      /**
+       * whether to enabled clerk
+       */
+      NEXT_PUBLIC_ENABLE_CLERK_AUTH: z.boolean().optional(),
+
+      NEXT_PUBLIC_ENABLE_NEXT_AUTH: z.boolean().optional(),
+
+      /**
+       * Auto-click SSO button timeout in milliseconds
+       * Only applies when there's exactly 1 SSO provider
+       * Default: 3000 (3 seconds)
+       */
+      NEXT_PUBLIC_AUTH_AUTO_CLICK_TIMEOUT: z.coerce.number().int().min(0).optional(),
+    },
     server: {
       AUTH_SECRET: z.string().optional(),
       AUTH_SSO_PROVIDERS: z.string().optional().default(''),
@@ -196,6 +221,10 @@ export const getAuthConfig = () => {
 
       // Internal JWT expiration time (e.g., '10s', '1m', '1h')
       INTERNAL_JWT_EXPIRATION: z.string().default('30s'),
+      // KEYCLOAK
+      AUTH_KEYCLOAK_ID: z.string().optional(),
+      AUTH_KEYCLOAK_SECRET: z.string().optional(),
+      AUTH_KEYCLOAK_ISSUER: z.string().optional(),
     },
 
     runtimeEnv: {
@@ -211,6 +240,13 @@ export const getAuthConfig = () => {
       AUTH_COGNITO_DOMAIN: process.env.AUTH_COGNITO_DOMAIN,
       AUTH_COGNITO_REGION: process.env.AUTH_COGNITO_REGION,
       AUTH_COGNITO_USERPOOL_ID: process.env.AUTH_COGNITO_USERPOOL_ID,
+      // Next Auth
+      NEXT_PUBLIC_ENABLE_NEXT_AUTH: process.env.NEXT_PUBLIC_ENABLE_NEXT_AUTH === '1',
+      NEXT_PUBLIC_AUTH_AUTO_CLICK_TIMEOUT: process.env.NEXT_PUBLIC_AUTH_AUTO_CLICK_TIMEOUT,
+      NEXT_AUTH_SSO_PROVIDERS: process.env.NEXT_AUTH_SSO_PROVIDERS,
+      NEXT_AUTH_SECRET: process.env.NEXT_AUTH_SECRET,
+      NEXT_AUTH_DEBUG: !!process.env.NEXT_AUTH_DEBUG,
+      NEXT_AUTH_SSO_SESSION_STRATEGY: process.env.NEXT_AUTH_SSO_SESSION_STRATEGY || 'jwt',
 
       // Auth Provider Credentials
       AUTH_GOOGLE_ID: process.env.AUTH_GOOGLE_ID,
@@ -289,6 +325,10 @@ export const getAuthConfig = () => {
 
       // Internal JWT expiration time
       INTERNAL_JWT_EXPIRATION: process.env.INTERNAL_JWT_EXPIRATION,
+      // KEYCLOAK
+      AUTH_KEYCLOAK_ID: process.env.AUTH_KEYCLOAK_ID,
+      AUTH_KEYCLOAK_SECRET: process.env.AUTH_KEYCLOAK_SECRET,
+      AUTH_KEYCLOAK_ISSUER: process.env.AUTH_KEYCLOAK_ISSUER,
     },
   });
 };

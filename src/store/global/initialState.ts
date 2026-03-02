@@ -10,6 +10,9 @@ export enum SidebarTabKey {
   Chat = 'chat',
   Community = 'community',
   Home = 'home',
+  Custom = 'custom',
+  Discover = 'discover',
+  Files = 'files',
   Image = 'image',
   Knowledge = 'knowledge',
   Me = 'me',
@@ -18,6 +21,7 @@ export enum SidebarTabKey {
   Resource = 'resource',
   Setting = 'settings',
   Video = 'video',
+  Teams = 'teams',
 }
 
 export enum ChatSettingsTabs {
