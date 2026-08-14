@@ -35,6 +35,6 @@ export default memo(() => {
     },
     reset: () => signIn(undefined, { callbackUrl: '/' }),
   };
-  console.log('[NextAuth] Error:', props.error);
+  console.info('[NextAuth] Error:', props.error);
   return <ErrorCapture {...props} />;
 });

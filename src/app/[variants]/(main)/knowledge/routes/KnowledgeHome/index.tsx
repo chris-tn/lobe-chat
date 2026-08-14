@@ -3,7 +3,7 @@
 import { createStyles } from 'antd-style';
 import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Flexbox } from 'react-layout-kit';
+import { Flexbox } from '@lobehub/ui';
 import { useMediaQuery } from 'react-responsive';
 
 import NProgress from '@/components/NProgress';

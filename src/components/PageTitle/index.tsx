@@ -1,3 +1,5 @@
+'use client';
+
 import { BRANDING_NAME } from '@lobechat/business-const';
 import { memo, useEffect } from 'react';
 

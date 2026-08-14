@@ -1,21 +1,5 @@
 export const DEFAULT_MODEL = 'claude-sonnet-4-5-20250929';
 export const DEFAULT_MINI_MODEL = 'gpt-5-mini';
-import { genUserLLMConfig } from './genUserLLMConfig';
-
-export const DEFAULT_LLM_CONFIG = genUserLLMConfig({
-  lmstudio: {
-    fetchOnClient: false,
-  },
-  ollama: {
-    enabled: false,
-    fetchOnClient: true,
-  },
-  openai: {
-    enabled: true,
-  },
-});
-
-export const DEFAULT_MODEL = 'gpt-5-mini';
 
 export const DEFAULT_EMBEDDING_MODEL = 'text-embedding-3-small';
 

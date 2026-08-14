@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import { Flexbox } from 'react-layout-kit';
+import { Flexbox } from '@lobehub/ui';
 
 import MainInterfaceTracker from '@/components/Analytics/MainInterfaceTracker';
 import BrandTextLoading from '@/components/Loading/BrandTextLoading';

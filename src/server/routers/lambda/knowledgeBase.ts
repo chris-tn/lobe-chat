@@ -6,9 +6,8 @@ import { KnowledgeBaseSharingModel } from '@/database/models/knowledgeBaseSharin
 import { insertKnowledgeBasesSchema } from '@/database/schemas';
 import { authedProcedure, router } from '@/libs/trpc/lambda';
 import { serverDatabase } from '@/libs/trpc/lambda/middleware';
-import { type KnowledgeBaseItem } from '@/types/knowledgeBase';
 import { adminAuth } from '@/libs/trpc/middleware/adminAuth';
-import { KnowledgeBaseItem } from '@/types/knowledgeBase';
+import { type KnowledgeBaseItem, KnowledgeBaseItem } from '@/types/knowledgeBase';
 
 const knowledgeBaseProcedure = authedProcedure.use(serverDatabase).use(async (opts) => {
   const { ctx } = opts;

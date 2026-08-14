@@ -18,15 +18,11 @@ import {
 import { memo, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { isDesktop } from '@/const/index';
-import { useGlobalStore } from '@/store/global';
-import { useHomeStore } from '@/store/home';
-import { isDesktop, isServerMode } from '@/const/version';
+import { isDesktop } from '@/const/version';
 import ShareAgentModal from '@/features/ShareAgentModal';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
-import { configService } from '@/services/config';
-import { useChatGroupStore } from '@/store/chatGroup';
 import { useGlobalStore } from '@/store/global';
+import { useHomeStore } from '@/store/home';
 import { useSessionStore } from '@/store/session';
 import { sessionHelpers } from '@/store/session/helpers';
 import { sessionGroupSelectors, sessionSelectors } from '@/store/session/selectors';
@@ -209,27 +205,8 @@ const Actions = memo<ActionProps>(({ group, id, openCreateGroupModal, parentType
   });
 
   return (
-    <DropdownMenu items={items} onOpenChange={setOpen}>
-      <ActionIcon
-        icon={MoreVertical}
-        size={{
-          blockSize: 28,
-          size: 16,
-        }}
-      />
-    </DropdownMenu>
     <>
-      <Dropdown
-        arrow={false}
-        menu={{
-          items,
-          onClick: ({ domEvent }) => {
-            domEvent.stopPropagation();
-          },
-        }}
-        onOpenChange={setOpen}
-        trigger={['click']}
-      >
+      <DropdownMenu items={items} onOpenChange={setOpen}>
         <ActionIcon
           icon={MoreVertical}
           size={{
@@ -237,7 +214,7 @@ const Actions = memo<ActionProps>(({ group, id, openCreateGroupModal, parentType
             size: 16,
           }}
         />
-      </Dropdown>
+      </DropdownMenu>
 
       {isAdmin && parentType === 'agent' && (
         <ShareAgentModal
@@ -245,7 +222,6 @@ const Actions = memo<ActionProps>(({ group, id, openCreateGroupModal, parentType
           onCancel={() => setShareModalOpen(false)}
           onSuccess={async () => {
             setShareModalOpen(false);
-            // Refresh sessions to reflect unshare changes
             await useSessionStore.getState().refreshSessions();
           }}
           open={shareModalOpen}

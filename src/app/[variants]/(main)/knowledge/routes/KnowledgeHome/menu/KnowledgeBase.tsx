@@ -4,7 +4,7 @@ import { createStyles } from 'antd-style';
 import { PlusIcon } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Flexbox } from 'react-layout-kit';
+import { Flexbox } from '@lobehub/ui';
 import { useNavigate } from 'react-router-dom';
 
 import { useCreateNewModal } from '@/features/KnowledgeBaseModal';

@@ -3,7 +3,7 @@
 import { Icon } from '@lobehub/ui';
 import { Cloud } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { Flexbox } from 'react-layout-kit';
+import { Flexbox } from '@lobehub/ui';
 
 const EmptyStatus = () => {
   const { t } = useTranslation('knowledgeBase');

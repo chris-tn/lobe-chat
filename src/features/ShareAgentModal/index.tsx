@@ -5,7 +5,7 @@ import { App, Divider, List, Switch, Tag } from 'antd';
 import { Trash2 } from 'lucide-react';
 import { memo, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Flexbox } from 'react-layout-kit';
+import { Flexbox } from '@lobehub/ui';
 
 import { lambdaClient } from '@/libs/trpc/client';
 import { agentSharingService } from '@/services/agentSharing';

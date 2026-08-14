@@ -7,7 +7,7 @@ import dayjs from 'dayjs';
 import { Cloud, RefreshCw, Settings, Trash2 } from 'lucide-react';
 import { memo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Flexbox } from 'react-layout-kit';
+import { Flexbox } from '@lobehub/ui';
 
 import { message } from '@/components/AntdStaticMethods';
 import { IntegrationItem as IntegrationItemType } from '@/database/schemas/integration';

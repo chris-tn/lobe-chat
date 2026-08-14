@@ -11,10 +11,14 @@ import { serverDatabase } from '@/libs/trpc/lambda/middleware';
 import { adminAuth } from '@/libs/trpc/middleware/adminAuth';
 import { AgentChatConfigSchema } from '@/types/agent';
 import { LobeMetaDataSchema } from '@/types/meta';
-import { type BatchTaskResult } from '@/types/service';
-import { type ChatSessionList, type LobeGroupSession } from '@/types/session';
-import { BatchTaskResult } from '@/types/service';
-import { ChatSessionList, LobeGroupSession, LobeSessionType } from '@/types/session';
+import { type BatchTaskResult, BatchTaskResult } from '@/types/service';
+import {
+  type ChatSessionList,
+  type LobeGroupSession,
+  ChatSessionList,
+  LobeGroupSession,
+  LobeSessionType,
+} from '@/types/session';
 
 const sessionProcedure = authedProcedure.use(serverDatabase).use(async (opts) => {
   const { ctx } = opts;

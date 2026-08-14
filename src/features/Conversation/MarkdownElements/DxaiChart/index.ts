@@ -1,6 +1,6 @@
 import { FC } from 'react';
 
-import { MarkdownElement, MarkdownElementProps } from '../type';
+import { MarkdownElement, MarkdownElementProps } from '../../Markdown/plugins/type';
 import Component from './Render';
 import rehypePlugin from './rehypePlugin';
 

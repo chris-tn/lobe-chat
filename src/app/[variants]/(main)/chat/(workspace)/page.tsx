@@ -2,7 +2,7 @@ import { Suspense } from 'react';
 
 import StructuredData from '@/components/StructuredData';
 import { serverFeatureFlags } from '@/config/featureFlags';
-import { BRANDING_NAME } from '@/const/branding';
+import { BRANDING_NAME } from '@lobechat/business-const';
 import { isDesktop } from '@/const/version';
 import { ldModule } from '@/server/ld';
 import { metadataModule } from '@/server/metadata';
@@ -10,7 +10,7 @@ import { translation } from '@/server/translation';
 import { DynamicLayoutProps } from '@/types/next';
 import { RouteVariants } from '@/utils/server/routeVariants';
 
-import PageTitle from '../features/PageTitle';
+import PageTitle from '@/components/PageTitle';
 import Changelog from './features/ChangelogModal';
 // import TelemetryNotification from './features/TelemetryNotification';
 

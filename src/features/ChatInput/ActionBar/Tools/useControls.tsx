@@ -397,34 +397,6 @@ export const useControls = ({ setUpdating }: { setUpdating: (updating: boolean) 
           />
         ),
       }));
-      })),
-      key: 'plugins',
-      label: (
-        <Flexbox align={'center'} gap={40} horizontal justify={'space-between'}>
-          {t('tools.plugins.groupName')}
-          {enablePluginCount === 0 ? null : (
-            <div style={{ fontSize: 12, marginInlineEnd: 4 }}>
-              {t('tools.plugins.enabled', { num: enablePluginCount })}
-            </div>
-          )}
-        </Flexbox>
-      ),
-      type: 'group',
-    },
-    {
-      type: 'divider',
-    },
-    {
-      extra: <Icon icon={ArrowRight} />,
-      icon: Store,
-      key: 'plugin-store',
-      label: t('tools.plugins.store'),
-      onClick: () => {
-        if (!isAdmin) return;
-        setModalOpen(true);
-      },
-    },
-  ];
 
     // 已启用的自定义插件
     const enabledCustomPlugins = customPlugins

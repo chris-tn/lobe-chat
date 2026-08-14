@@ -1,4 +1,4 @@
-import DxaiChart from './DxaiChart';
+import DxaiChart from '../../MarkdownElements/DxaiChart';
 import LobeArtifact from './LobeArtifact';
 import LobeThinking from './LobeThinking';
 import LocalFile from './LocalFile';

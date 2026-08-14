@@ -30,7 +30,7 @@ const CustomRouter = memo(() => {
         return null;
     }, [pathname]);
 
-    console.log('[CustomRouter] pathname:', pathname, 'currentTabId:', currentTabId);
+    console.info('[CustomRouter] pathname:', pathname, 'currentTabId:', currentTabId);
 
     // If no custom tabs configured, show error
     if (customTabs.length === 0) {
@@ -49,7 +49,7 @@ const CustomRouter = memo(() => {
     const tabId = currentTabId || customTabs[0].id;
     const currentTab = customTabs.find((t) => t.id === tabId);
 
-    console.log('[CustomRouter] Rendering tab:', tabId, currentTab?.name);
+    console.info('[CustomRouter] Rendering tab:', tabId, currentTab?.name);
 
     if (!currentTab) {
         return (

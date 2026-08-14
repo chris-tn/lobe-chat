@@ -4,7 +4,7 @@ import { Button, Icon } from '@lobehub/ui';
 import { Plus } from 'lucide-react';
 import { memo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Flexbox } from 'react-layout-kit';
+import { Flexbox } from '@lobehub/ui';
 import useSWR from 'swr';
 
 import { message } from '@/components/AntdStaticMethods';

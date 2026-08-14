@@ -11,10 +11,9 @@ import { useNewScreen } from '@/features/Conversation/Messages/components/useNew
 
 import ErrorMessageExtra, { useErrorContent } from '../../Error';
 import { useAgentMeta, useDoubleClickEdit } from '../../hooks';
+import { getMarkdownElements } from '../../Markdown/plugins';
 import { dataSelectors, messageStateSelectors, useConversationStore } from '../../store';
-import { getMarkdownElements } from '../../MarkdownElements';
 import { useEnableChartDisplay } from '@/hooks/useEnableChartDisplay';
-import { useDoubleClickEdit } from '../../hooks/useDoubleClickEdit';
 import { normalizeThinkTags, processWithArtifact } from '../../utils/markdown';
 import MessageBranch from '../components/MessageBranch';
 import {

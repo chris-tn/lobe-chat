@@ -4,7 +4,7 @@ import { createStyles } from 'antd-style';
 import { LucideLoader2, MoreVertical, PencilLine, Trash } from 'lucide-react';
 import { memo, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Center, Flexbox } from 'react-layout-kit';
+import { Center, Flexbox } from '@lobehub/ui';
 
 import BubblesLoading from '@/components/BubblesLoading';
 import RepoIcon from '@/components/RepoIcon';

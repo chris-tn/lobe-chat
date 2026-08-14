@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import { Flexbox } from 'react-layout-kit';
+import { Flexbox } from '@lobehub/ui';
 
 import { isDesktop } from '@/const/version';
 import InitClientDB from '@/features/InitClientDB';

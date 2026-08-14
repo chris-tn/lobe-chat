@@ -108,7 +108,6 @@ export class FileModel {
   delete = async (id: string, removeGlobalFile: boolean = true, trx?: Transaction) => {
     const executeInTransaction = async (tx: Transaction) => {
       // In pglite environment, non-transactional operations cannot be used within a transaction as it will block
-      const file = await this.findById(id, tx);
       // pglite 环境下不能再 transaction 中使用非事务操作，会阻塞住
       const file = await this.findById(id, tx, true); // Use skipUserCheck to allow shared KB access
       if (!file) return;
@@ -182,9 +181,6 @@ export class FileModel {
     if (ids.length === 0) return [];
 
     return await this.db.transaction(async (trx) => {
-      // 1. First get the file list to return the deleted files
-      const fileList = await trx.query.files.findMany({
-        where: and(inArray(files.id, ids), eq(files.userId, this.userId)),
       // 1. Get files that user owns or has access to via shared KBs
       const { KnowledgeBaseSharingModel } = await import('./knowledgeBaseSharing');
       const sharingModel = new KnowledgeBaseSharingModel(this.db, this.userId);
@@ -222,17 +218,6 @@ export class FileModel {
       const deletableFileIds = deletableFiles.map((file) => file.id);
 
       // Extract file hashes that need to be checked
-      const hashList = fileList.map((file) => file.fileHash!).filter(Boolean);
-
-      // 2. Delete related chunks
-      await this.deleteFileChunks(trx as any, ids);
-
-      // 3. Delete file records
-      await trx.delete(files).where(and(inArray(files.id, ids), eq(files.userId, this.userId)));
-
-      // If global files don't need to be deleted, return directly
-      if (!removeGlobalFile || hashList.length === 0) return fileList;
-      // 提取需要检查的文件哈希值
       const hashList = deletableFiles.map((file) => file.fileHash!).filter(Boolean);
 
       // 2. 删除相关的 chunks
@@ -263,9 +248,6 @@ export class FileModel {
       // 5. Delete global files that are no longer referenced
       await trx.delete(globalFiles).where(inArray(globalFiles.hashId, hashesToDelete));
 
-      // Return the list of deleted files
-      return fileList;
-      // 返回删除的文件列表
       return deletableFiles;
     });
   };

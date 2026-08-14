@@ -3,7 +3,7 @@ import { createStyles } from 'antd-style';
 import { Cloud } from 'lucide-react';
 import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Flexbox } from 'react-layout-kit';
+import { Flexbox } from '@lobehub/ui';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 const useStyles = createStyles(({ css, token }) => ({

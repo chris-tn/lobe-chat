@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { memo, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Flexbox } from 'react-layout-kit';
+import { Flexbox } from '@lobehub/ui';
 
 import { useGlobalStore } from '@/store/global';
 import { SidebarTabKey } from '@/store/global/initialState';
@@ -42,7 +42,7 @@ const TopActions = memo<TopActionProps>(({ tab, isPinned }) => {
   // Parse custom tabs from environment variable
   const customTabs = useMemo(() => {
     const tabs = parseCustomTabsConfig();
-    console.log('[TopActions] Custom tabs:', tabs);
+    console.info('[TopActions] Custom tabs:', tabs);
     return tabs;
   }, []);
 

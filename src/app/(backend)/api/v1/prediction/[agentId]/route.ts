@@ -104,7 +104,7 @@ function convertToOpenAIMessages(messages: UIChatMessage[]): Array<{
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ agentId: string }> }) {
   const { agentId } = await params;
-  console.log('POST /api/v1/prediction/%s - Request received', agentId);
+  console.info('POST /api/v1/prediction/%s - Request received', agentId);
 
   try {
     // ============ 1. Parse request body ============ //
@@ -116,9 +116,6 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ age
     }
 
     // ============ 2. Authentication - Get user from email ============ //
-    let userId: string;
-    let jwtPayload: any = {};
-
     // Get email from overrideConfig.aUser
     const emailFromBody = overrideConfig?.aUser;
 
@@ -134,9 +131,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ age
       return jsonResponse({ error: 'User not found with the provided email' }, 404);
     }
 
-    userId = user.id;
-    jwtPayload = { ...jwtPayload, userId };
-    console.log('Authenticated via email: %s, userId: %s', emailFromBody, userId);
+    const userId = user.id;
+    const jwtPayload: any = { userId };
+    console.info('Authenticated via email: %s, userId: %s', emailFromBody, userId);
 
     const sessionModel = new SessionModel(serverDB, userId);
     const messageModel = new MessageModel(serverDB, userId);
@@ -145,10 +142,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ age
     // ============ 3. Validate agent and check access ============ //
     // First check if user has access to this agent
     const accessibleAgentIds = await agentModel.queryAccessibleAgentIds();
-    console.log('User %s accessible agents: %O', userId, accessibleAgentIds);
-    console.log('Requested agentId: %s', agentId);
+    console.info('User %s accessible agents: %O', userId, accessibleAgentIds);
+    console.info('Requested agentId: %s', agentId);
     if (!accessibleAgentIds.includes(agentId)) {
-      console.log('Agent %s not accessible to user %s', agentId, userId);
+      console.info('Agent %s not accessible to user %s', agentId, userId);
       return jsonResponse({ error: 'Agent not found or access denied' }, 404);
     }
 
@@ -157,7 +154,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ age
     if (!agentConfig) {
       return jsonResponse({ error: 'Agent not found' }, 404);
     }
-    console.log('Found agent: %s', agentId);
+    console.info('Found agent: %s', agentId);
 
     // ============ 4. Session Management with chatId ============ //
     let session: any = null;
@@ -171,7 +168,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ age
 
       if (session) {
         sessionId = session.id;
-        console.log('Found existing session by chatId: %s', sessionId);
+        console.info('Found existing session by chatId: %s', sessionId);
       } else {
         // Create new session with client_session
         session = await sessionModel.createSessionForExistingAgent(agentId);
@@ -181,13 +178,13 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ age
           .set({ clientSession: chatId })
           .where(eq(sessions.id, session.id));
         sessionId = session.id;
-        console.log('Created new session with chatId: %s', sessionId);
+        console.info('Created new session with chatId: %s', sessionId);
       }
     } else {
       // Create new session without chatId
       session = await sessionModel.createSessionForExistingAgent(agentId);
       sessionId = session.id;
-      console.log('Created new session: %s', sessionId);
+      console.info('Created new session: %s', sessionId);
     }
 
     // ============ 5. Get conversation history ============ //
@@ -204,7 +201,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ age
       topicId: session?.topicId || undefined,
     });
 
-    console.log('Created user message: %s', userMessage.id);
+    console.info('Created user message: %s', userMessage.id);
 
     // ============ 7. Create assistant message (loading) ============ //
     const assistantMessage = await messageModel.create({
@@ -221,7 +218,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ age
       topicId: session?.topicId || undefined,
     });
 
-    console.log('Created assistant message: %s', assistantMessage.id);
+    console.info('Created assistant message: %s', assistantMessage.id);
 
     // ============ 8. Prepare messages for chat completion ============ //
     const allMessages = [...historyMessages, userMessage as any];
@@ -634,8 +631,11 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ age
 
     const error = errorContent || e;
 
-    const logMethod = AGENT_RUNTIME_ERROR_SET.has(errorType as string) ? 'warn' : 'error';
-    console[logMethod](`Flowise API [${agentId || 'unknown'}] ${errorType}:`, error);
+    if (AGENT_RUNTIME_ERROR_SET.has(errorType as string)) {
+      console.warn(`Flowise API [${agentId || 'unknown'}] ${errorType}:`, error);
+    } else {
+      console.error(`Flowise API [${agentId || 'unknown'}] ${errorType}:`, error);
+    }
 
     const errorResponse = createErrorResponse(errorType, { error, ...res, provider: 'unknown' });
     // Add CORS headers to error response

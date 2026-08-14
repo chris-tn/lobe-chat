@@ -26,7 +26,7 @@ import {
   YAxis,
   ZAxis,
 } from 'recharts';
-import { Flexbox } from 'react-layout-kit';
+import { Flexbox } from '@lobehub/ui';
 
 import { MarkdownElementProps } from '../../type';
 

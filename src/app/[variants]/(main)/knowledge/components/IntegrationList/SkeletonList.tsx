@@ -1,7 +1,7 @@
 'use client';
 
 import { Skeleton } from 'antd';
-import { Flexbox } from 'react-layout-kit';
+import { Flexbox } from '@lobehub/ui';
 
 export const SkeletonList = () => {
   return (

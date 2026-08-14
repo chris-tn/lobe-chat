@@ -2,7 +2,7 @@
 
 import { ChatHeader } from '@lobehub/ui/chat';
 import { memo } from 'react';
-import { Flexbox } from 'react-layout-kit';
+import { Flexbox } from '@lobehub/ui';
 
 import FilesSearchBar from './FilesSearchBar';
 import ShareKnowledgeBaseButton from './ShareKnowledgeBaseButton';

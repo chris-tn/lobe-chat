@@ -2,7 +2,7 @@ import { ActionIcon, ActionIconProps } from '@lobehub/ui';
 import { Github } from 'lucide-react';
 import Link from 'next/link';
 import { memo } from 'react';
-import { Flexbox } from 'react-layout-kit';
+import { Flexbox } from '@lobehub/ui';
 
 import { GITHUB } from '@/const/url';
 import { featureFlagsSelectors, useServerConfigStore } from '@/store/serverConfig';

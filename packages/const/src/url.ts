@@ -2,20 +2,16 @@ import urlJoin from 'url-join';
 
 const isDev = process.env.NODE_ENV === 'development';
 
-export const OFFICIAL_URL = 'https://app.lobehub.com';
-export const OFFICIAL_SITE = 'https://lobehub.com';
-export const OFFICIAL_DOMAIN = 'lobehub.com';
-export const UTM_SOURCE = 'chat_preview';
-
 export const OFFICIAL_URL = 'https://dxai.vn';
 export const OFFICIAL_PREVIEW_URL = 'https://dxai.vn';
 export const OFFICIAL_SITE = 'https://dxai.vn';
+export const OFFICIAL_DOMAIN = 'lobehub.com';
+export const UTM_SOURCE = 'chat_preview';
 
 export const OG_URL = '/og/og.webp?v=1';
 
 export const GITHUB = 'https://github.com/';
 export const GITHUB_ISSUES = urlJoin(GITHUB, 'issues/new/choose');
-export const CHANGELOG = 'https://lobehub.com/changelog';
 export const CHANGELOG = 'https://dxai.vn/changelog';
 export const DOCKER_IMAGE = 'https://hub.docker.com/r/dxai/dxai';
 
